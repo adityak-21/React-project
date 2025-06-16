@@ -1,37 +1,130 @@
-import React from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useHistory, Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import './LoginForm.css';
-const LoginForm = () => {
-    const handleSubmit = (event) => {
+import { withRouter } from 'react-router-dom';
+class LoginForm extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            email: '',
+            password: ''
+        }
+    }
+    handleChange = (e) => {
+        this.setState({ [e.target.id]: e.target.value });
+    }
+    handleSubmit = async (event) => {
         event.preventDefault();
-        alert('Form submitted!');
-    };
-    return (
-        <form className="login-form" onSubmit={handleSubmit}>
-            <h2 className="login-title">Login</h2>
-            <div className="form-group">
-                <label htmlFor="email">Email address</label>
-                <input
-                    type="email"
-                    className="form-control"
-                    id="email"
-                    placeholder="Enter email"
-                    required
-                />
-            </div>
+        try {
+            const { email, password } = this.state;
+            const requestBody = { email, password };
+            const response = await axios.post('http://localhost:8000/api/v1/login', requestBody);
+            localStorage.setItem('access_token', response.data.access_token);
+            console.log(response.data);
+            this.props.history.push('/');
+        } catch (error) {
+            console.log(error);
+            Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: error.response?.data?.message || error.message || "Something went wrong. Please try again!"
+            });
+        }
+    }
+    render () {
+        return (
+            <form className="login-form" onSubmit={this.handleSubmit}>
+                <h2 className="login-title">Login</h2>
+                <div className="form-group">
+                    <label htmlFor="email">Email address</label>
+                    <input
+                        onChange={this.handleChange}
+                        type="email"
+                        className="form-control"
+                        id="email"
+                        placeholder="Enter email"
+                        required
+                    />
+                </div>
 
-            <div className="form-group">
-                <label htmlFor="password">Password</label>
-                <input
-                    type="password"
-                    className="form-control"
-                    id="password"
-                    placeholder="Password"
-                    required
-                />
-            </div>
+                <div className="form-group">
+                    <label htmlFor="password">Password</label>
+                    <input
+                        onChange={this.handleChange}
+                        type="password"
+                        className="form-control"
+                        id="password"
+                        placeholder="Password"
+                        required
+                    />
+                </div>
 
-            <button className="login-btn" type="submit">Login</button>
-        </form>
-    );
-};
-export default LoginForm;
+                <button className="login-btn" type="submit">Login</button>
+            </form>
+        );
+    }
+}
+export default withRouter(LoginForm);
+
+// const LoginForm = () => {
+//     const history = useHistory();
+//     const [email, setEmail] = useState('');
+//     const [password, setPassword] = useState('');
+
+//     const handleSubmit = async (event) => {
+//         event.preventDefault();
+//         try {
+//             const requestBody = {
+//                 email,
+//                 password
+//             };
+//             const response = await axios.post('http://localhost:8000/api/v1/login', requestBody);
+//             localStorage.setItem('access_token', response.data.access_token)
+//             console.log(response.data);
+//             history.push('/');
+//         }
+//         catch (error) {
+//             console.log(error);
+//             Swal.fire({
+//                 icon: "error",
+//                 title: "Oops...",
+//                 text: error.response?.data?.message || error.message || "Something went wrong. Please try again!"
+//             });
+//         }
+//     };
+//     //arrow function 
+//     return (
+//         <form className="login-form" onSubmit={handleSubmit}>
+//             <h2 className="login-title">Login</h2>
+//             <div className="form-group">
+//                 <label htmlFor="email">Email address</label>
+//                 <input
+//                 //callbacks
+//                     onChange={(e) => setEmail(e.target.value)} 
+//                     type="email"
+//                     className="form-control"
+//                     id="email"
+//                     placeholder="Enter email"
+//                     required
+//                 />
+//             </div>
+
+//             <div className="form-group">
+//                 <label htmlFor="password">Password</label>
+//                 <input
+//                     onChange={e => setPassword(e.target.value)}
+//                     type="password"
+//                     className="form-control"
+//                     id="password"
+//                     placeholder="Password"
+//                     required
+//                 />
+//             </div>
+
+//             <button className="login-btn" type="submit">Login</button>
+//         </form>
+//     );
+// };
+// export default LoginForm;
