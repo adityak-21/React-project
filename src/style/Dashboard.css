@@ -1,0 +1,26 @@
+.user-listing-title {
+  text-align: center;
+  color: #23395d;
+  margin-top: 40px;
+  margin-bottom: 40px;
+  font-weight: 600;
+}
+.search-name {
+  margin-right: 50px;
+  margin-left: 50px;
+}
+.seach-email {
+  margin-right: 50px;
+}
+.search-role {
+  margin-left: 50px;
+  margin-right: 50px;
+}
+.page-number-input {
+  margin-right: 50px;
+  width: 40px;
+}
+.per-page-input {
+  margin-right: 50px;
+  width: 40px;
+}
