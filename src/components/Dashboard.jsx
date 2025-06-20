@@ -1,4 +1,4 @@
-import React, { useHistory, useState } from "react";
+import React, { useHistory, useState, useEffect } from "react";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -13,13 +13,20 @@ import Swal from "sweetalert2";
 import { listUsers } from "../api/UserApi";
 import { Tooltip } from "../common/Tooltip";
 import { LoaderRow } from "../common/Loading";
+import { useDispatch, useSelector } from "react-redux";
+import { useDebounce } from "../common/Debounce";
+import {
+  setAdmin,
+  setViewAsAdmin,
+  verifyAdminStatus,
+} from "../redux/verifyAdmin";
 import { verifyAdmin } from "../api/AuthApi";
 import { deleteUsers } from "../api/UserApi";
 /**
- * debounce
+ * debounce                                             done
  * Modal implement replace Swal
- * shift isAdmin to login page and redux store
- * Download with all users in the sepcified filters
+ * shift isAdmin to login page and redux store          done
+ * Download with all users in the sepcified filters     done
  * sql injection
  * <div>link</div>
  * in-secure html
@@ -146,6 +153,10 @@ function HeadRow({ isAdmin, allChecked, onCheckAll }) {
 }
 
 const Dashboard = () => {
+  const dispatch = useDispatch();
+  const { isAdmin, viewAsAdmin, verifying } = useSelector(
+    (state) => state.admin
+  );
   const [filters, setFilters] = useState({
     name: "",
     email: "",
@@ -154,19 +165,20 @@ const Dashboard = () => {
     perpage: 6,
   });
   const [users, setUsers] = useState([]);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [viewAsAdmin, setViewAsAdmin] = useState(false);
+  //   const [isAdmin, setIsAdmin] = useState(false);
+  //   const [viewAsAdmin, setViewAsAdmin] = useState(false);
   const [userFetching, setUserFetching] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState([]);
+  const debouncedFilters = useDebounce(filters, 3000);
 
   //useEffect
   // first time render - componentDidMount
   // when props changes - componentDidUpdate
   // when the componets unmounts - componentWillUnmount
-  React.useEffect(() => {
+  useEffect(() => {
     setUserFetching(true);
 
-    listUsers(filters)
+    listUsers(debouncedFilters)
       .then((res) => {
         console.log(res.data);
         setUsers(res.data.users);
@@ -177,16 +189,18 @@ const Dashboard = () => {
         setUserFetching(false);
       });
 
-    verifyAdmin()
-      .then((res) => {
-        setIsAdmin(true);
-        setViewAsAdmin(true);
-      })
-      .catch((err) => {
-        setIsAdmin(false);
-        setViewAsAdmin(false);
-      });
-  }, [filters]);
+    // verifyAdmin()
+    //   .then((res) => {
+    //     setIsAdmin(true);
+    //     setViewAsAdmin(true);
+    //   })
+    //   .catch((err) => {
+    //     setIsAdmin(false);
+    //     setViewAsAdmin(false);
+    //   });
+
+    dispatch(verifyAdminStatus(verifyAdmin));
+  }, [debouncedFilters]);
 
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;
@@ -241,6 +255,42 @@ const Dashboard = () => {
     Swal.fire("Not Implemented", "Show create user form here", "info");
   };
 
+  const handleDownloadCSV = () => {
+    // Swal.fire("Not Implemented", "Download CSV with current filters", "info");
+    const allFilters = { ...filters, pagenumber: 1, perpage: 10000 };
+    listUsers(allFilters)
+      .then((res) => {
+        const allUsers = res.data.users;
+        // stream
+        // batch processing
+        // yeild
+        // how to handle bulky apis
+        const csvContent = [
+          "Id,Name,Email,Role,Created By,Created At,Updated At",
+          ...allUsers.map(
+            (user) =>
+              `${user.id},${user.name},${user.email},${user.role},${user.created_by},${user.created_at},${user.updated_at}`
+          ),
+        ].join("\n");
+        const blob = new Blob([csvContent], {
+          type: "text/csv;charset=utf-8;",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "users.csv");
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        Swal.fire("Success", "CSV downloaded successfully", "success");
+      })
+      .catch((err) => {
+        console.error("Failed to download CSV:", err);
+        Swal.fire("Error", "Failed to download CSV", "error");
+      });
+  };
+
   const allChecked = users.length > 0 && selectedUsers.length === users.length;
   //why inline style is avoided ?
   return (
@@ -251,7 +301,7 @@ const Dashboard = () => {
           <Button
             variant={isAdmin ? "contained" : "outlined"}
             color="primary"
-            onClick={() => setIsAdmin(true)}
+            onClick={() => dispatch(setAdmin(true))}
             style={{ marginRight: 8 }}
           >
             Admin
@@ -259,7 +309,7 @@ const Dashboard = () => {
           <Button
             variant={!isAdmin ? "contained" : "outlined"}
             color="secondary"
-            onClick={() => setIsAdmin(false)}
+            onClick={() => dispatch(setAdmin(false))}
           >
             User
           </Button>
@@ -285,6 +335,16 @@ const Dashboard = () => {
           </Button>
         </div>
       )}
+      <div style={{ marginBottom: "1rem" }}>
+        <Button
+          variant="outlined"
+          color="default"
+          onClick={handleDownloadCSV}
+          style={{ marginRight: "1rem" }}
+        >
+          Download CSV
+        </Button>
+      </div>
       <UserFilterForm filters={filters} handleInputChange={handleInputChange} />
       <TableContainer component={Paper}>
         <Table>

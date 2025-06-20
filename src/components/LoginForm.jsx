@@ -21,6 +21,7 @@ const LoginForm = () => {
       .then((response) => {
         localStorage.setItem("access_token", response.data.access_token);
         console.log(response.data);
+        
         history.push("/dashboard");
       })
       .catch((error) => {
