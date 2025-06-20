@@ -1,4 +1,4 @@
-import React, { useHistory } from "react";
+import React, { useHistory, useState } from "react";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -6,11 +6,24 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
+import Button from "@material-ui/core/Button";
+import Checkbox from "@material-ui/core/Checkbox";
 import "../style/Dashboard.css";
 import Swal from "sweetalert2";
 import { listUsers } from "../api/UserApi";
 import { Tooltip } from "../common/Tooltip";
 import { LoaderRow } from "../common/Loading";
+import { verifyAdmin } from "../api/AuthApi";
+import { deleteUsers } from "../api/UserApi";
+/**
+ * debounce
+ * Modal implement replace Swal
+ * shift isAdmin to login page and redux store
+ * Download with all users in the sepcified filters
+ * sql injection
+ * <div>link</div>
+ * in-secure html
+ */
 
 function UserFilterForm({ filters, handleInputChange }) {
   return (
@@ -71,9 +84,14 @@ function UserFilterForm({ filters, handleInputChange }) {
   );
 }
 
-function UserTableRow({ user }) {
+function UserTableRow({ user, isAdmin, checked, onCheck, onDelete }) {
   return (
     <TableRow>
+      {isAdmin && (
+        <TableCell padding="checkbox">
+          <Checkbox checked={checked} onChange={() => onCheck(user.id)} />
+        </TableCell>
+      )}
       <TableCell>{user.id}</TableCell>
       <TableCell>{user.name}</TableCell>
       <TableCell>{user.email}</TableCell>
@@ -81,6 +99,18 @@ function UserTableRow({ user }) {
       <TableCell>{user.created_by}</TableCell>
       <TableCell>{user.created_at}</TableCell>
       <TableCell>{user.updated_at}</TableCell>
+      {isAdmin && (
+        <TableCell>
+          <Button
+            size="small"
+            variant="contained"
+            color="secondary"
+            onClick={() => onDelete([user.id])}
+          >
+            Delete
+          </Button>
+        </TableCell>
+      )}
     </TableRow>
   );
 }
@@ -95,9 +125,14 @@ function NoUsersRow({ colSpan }) {
   );
 }
 
-function HeadRow() {
+function HeadRow({ isAdmin, allChecked, onCheckAll }) {
   return (
     <TableRow>
+      {isAdmin && (
+        <TableCell padding="checkbox">
+          <Checkbox checked={allChecked} onChange={onCheckAll} />
+        </TableCell>
+      )}
       <TableCell>Id</TableCell>
       <TableCell>Name</TableCell>
       <TableCell>Email</TableCell>
@@ -105,20 +140,24 @@ function HeadRow() {
       <TableCell>Created By</TableCell>
       <TableCell>Created At</TableCell>
       <TableCell>Updated At</TableCell>
+      {isAdmin && <TableCell>Action</TableCell>}
     </TableRow>
   );
 }
 
 const Dashboard = () => {
-  const [filters, setFilters] = React.useState({
+  const [filters, setFilters] = useState({
     name: "",
     email: "",
     role: "",
     pagenumber: 1,
     perpage: 6,
   });
-  const [users, setUsers] = React.useState([]);
-  const [userFetching, setUserFetching] = React.useState(false);
+  const [users, setUsers] = useState([]);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [viewAsAdmin, setViewAsAdmin] = useState(false);
+  const [userFetching, setUserFetching] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState([]);
 
   //useEffect
   // first time render - componentDidMount
@@ -137,6 +176,16 @@ const Dashboard = () => {
         console.error(err);
         setUserFetching(false);
       });
+
+    verifyAdmin()
+      .then((res) => {
+        setIsAdmin(true);
+        setViewAsAdmin(true);
+      })
+      .catch((err) => {
+        setIsAdmin(false);
+        setViewAsAdmin(false);
+      });
   }, [filters]);
 
   const handleInputChange = (e) => {
@@ -147,23 +196,121 @@ const Dashboard = () => {
       ...(name !== "pagenumber" && name !== "perpage" && { pagenumber: 1 }),
     }));
   };
+
+  const handleCheck = (userId) => {
+    setSelectedUsers((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  const handleCheckAll = () => {
+    if (selectedUsers.length === users.length) {
+      setSelectedUsers([]);
+    } else {
+      setSelectedUsers(users.map((u) => u.id));
+    }
+  };
+
+  const handleDelete = (userIds) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Delete ${userIds.length} user(s)?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteUsers(userIds)
+          .then(() => {
+            setUsers((prev) => prev.filter((u) => !userIds.includes(u.id)));
+            setSelectedUsers((prev) =>
+              prev.filter((id) => !userIds.includes(id))
+            );
+            Swal.fire("Deleted!", "User(s) deleted.", "success");
+          })
+          .catch((err) => {
+            Swal.fire("Error", "Failed to delete users", "error");
+          });
+      }
+    });
+  };
+
+  const handleCreateUser = () => {
+    Swal.fire("Not Implemented", "Show create user form here", "info");
+  };
+
+  const allChecked = users.length > 0 && selectedUsers.length === users.length;
   //why inline style is avoided ?
   return (
     <div>
       <h2 className="user-listing-title">User-Listing</h2>
+      {viewAsAdmin && (
+        <div style={{ marginBottom: "1rem" }}>
+          <Button
+            variant={isAdmin ? "contained" : "outlined"}
+            color="primary"
+            onClick={() => setIsAdmin(true)}
+            style={{ marginRight: 8 }}
+          >
+            Admin
+          </Button>
+          <Button
+            variant={!isAdmin ? "contained" : "outlined"}
+            color="secondary"
+            onClick={() => setIsAdmin(false)}
+          >
+            User
+          </Button>
+        </div>
+      )}
+      {isAdmin && (
+        <div style={{ marginBottom: "1rem" }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleCreateUser}
+            style={{ marginRight: "1rem" }}
+          >
+            Create User
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            disabled={selectedUsers.length === 0}
+            onClick={() => handleDelete(selectedUsers)}
+          >
+            Delete Selected
+          </Button>
+        </div>
+      )}
       <UserFilterForm filters={filters} handleInputChange={handleInputChange} />
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
-            <HeadRow />
+            <HeadRow
+              isAdmin={isAdmin}
+              allChecked={allChecked}
+              onCheckAll={handleCheckAll}
+            />
           </TableHead>
           <TableBody>
-            {userFetching && <LoaderRow colSpan={7} />}
-            {!userFetching && users.length === 0 && <NoUsersRow colSpan={7} />}
+            {userFetching && <LoaderRow colSpan={isAdmin ? 9 : 7} />}
+            {!userFetching && users.length === 0 && (
+              <NoUsersRow colSpan={isAdmin ? 9 : 7} />
+            )}
             {!userFetching &&
               users.length > 0 &&
               users.map((user) => (
-                <UserTableRow user={user} key={`${user.id}-${user.role}`} />
+                <UserTableRow
+                  user={user}
+                  key={`${user.id}-${user.role}`}
+                  isAdmin={isAdmin}
+                  checked={selectedUsers.includes(user.id)}
+                  onCheck={handleCheck}
+                  onDelete={handleDelete}
+                />
               ))}
           </TableBody>
         </Table>

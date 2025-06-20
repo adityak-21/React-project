@@ -23,6 +23,7 @@ export const registerUser = (formData, history) => (dispatch) => {
   dispatch({ type: "REGISTER_REQUEST" });
   register(formData)
     .then(() => {
+      //   dispatch({ type: "REGISTER_SUCCESS", payload });
       dispatch({ type: "REGISTER_SUCCESS" });
       history.push("/login");
     })
