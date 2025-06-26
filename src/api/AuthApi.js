@@ -50,3 +50,15 @@ export const verifyAdmin = () => {
     }
   );
 };
+
+export const me = () => {
+  return axios.post(
+    `${BASE_URL}/user-profile`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    }
+  );
+};

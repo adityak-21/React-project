@@ -105,6 +105,31 @@ function TaskFilterForm({ filters, handleInputChange }) {
           className="per-page-input"
         />
       </Tooltip>
+      <Tooltip text="Sort By">
+        <select
+          name="sort_by"
+          value={filters.sort_by || ""}
+          onChange={handleInputChange}
+          className="search-status"
+        >
+          <option value="">Default</option>
+          <option value="title">Title</option>
+          <option value="due_date">Due Date</option>
+          <option value="status">Status</option>
+        </select>
+      </Tooltip>
+      <Tooltip text="Sort Order">
+        <select
+          name="sort_order"
+          value={filters.sort_order || ""}
+          onChange={handleInputChange}
+          className="search-status"
+        >
+          <option value="">Default</option>
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
+        </select>
+      </Tooltip>
     </form>
   );
 }
@@ -162,6 +187,8 @@ const AllTaskListing = () => {
     status: "",
     pagenumber: 1,
     perpage: 6,
+    sort_by: "",
+    sort_order: "",
   });
   const [tasks, setTasks] = useState([]);
   const [taskFetching, setTaskFetching] = useState(false);

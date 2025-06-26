@@ -19,6 +19,8 @@ import { verifyAdmin } from "./api/AuthApi";
 import MyTaskListing from "./components/MyTaskListing";
 import AdminRoute from "./components/AdminRoute";
 import AllTaskListing from "./components/AllTaskListing";
+import CreatedTaskListing from "./components/CreatedTaskListing";
+import Dashboard from "./components/Dashboard";
 
 function AppContent() {
   const location = useLocation();
@@ -47,6 +49,8 @@ function AppContent() {
           <PrivateRoute path="/userListing" component={UserListing} />
           <PrivateRoute path="/userActivity" component={UserActivity} />
           <PrivateRoute path="/myTasks" component={MyTaskListing} />
+          <PrivateRoute path="/createdTasks" component={CreatedTaskListing} />
+          <PrivateRoute path="/dashboard" component={Dashboard} />
           <AdminRoute path="/allTasks" component={AllTaskListing} />
           <Route path="/logout" component={Logout} />
           <Redirect from="/" to="/login" />

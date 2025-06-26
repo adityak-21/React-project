@@ -23,6 +23,12 @@ export const SidebarData = [
     cName: "nav-text",
   },
   {
+    title: "Created-Tasks",
+    path: "/createdTasks",
+    icon: <FaIcons.FaTasks />,
+    cName: "nav-text",
+  },
+  {
     title: "All-Tasks",
     path: "/allTasks",
     icon: <FaIcons.FaTasks />,

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Loader } from "../common/Loading";
 import { useDebounce } from "../common/Debounce";
-import { listMyTasks } from "../api/TaskApi";
+import { listCreatedTasks, updateTaskTitle } from "../api/TaskApi";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -13,9 +13,13 @@ import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import { Tooltip } from "../common/Tooltip";
 import { updateTaskStatus } from "../api/TaskApi";
+import { updateTaskDueDate } from "../api/TaskApi";
+import { updateTaskDescription } from "../api/TaskApi";
 
 import { LoaderRow } from "../common/Loading";
 import "../style/MyTaskListing.css";
+
+import { Modal } from "../common/Modal";
 
 function TaskFilterForm({ filters, handleInputChange }) {
   return (
@@ -30,12 +34,12 @@ function TaskFilterForm({ filters, handleInputChange }) {
           className="search-name"
         />
       </Tooltip>
-      <Tooltip text="Write creator name">
+      <Tooltip text="Write assignee name">
         <input
           type="text"
-          name="created_by"
-          placeholder="Search by Creator"
-          value={filters.created_by}
+          name="assignee"
+          placeholder="Search by Assignee"
+          value={filters.assignee}
           onChange={handleInputChange}
           className="search-name"
         />
@@ -125,23 +129,92 @@ function TaskFilterForm({ filters, handleInputChange }) {
   );
 }
 
-function TaskTableRow({ task, handleStatusChange }) {
+function TaskTableRow({
+  task,
+  handleStatusChange,
+  handleDueDateChange,
+  handleTitleChange,
+  handleDescriptionChange,
+}) {
+  const currStatus = task.status;
   return (
     <TableRow>
       <TableCell>{task.id}</TableCell>
-      <TableCell>{task.title}</TableCell>
-      <TableCell>{task.description}</TableCell>
-      <TableCell>{task.created_by}</TableCell>
-      <TableCell>{task.due_date}</TableCell>
+      {/* <TableCell>{task.title}</TableCell>
+      <TableCell>{task.description}</TableCell> */}
+      <TableCell>
+        {task.title && (
+          <span
+            style={{
+              cursor: "pointer",
+              textDecoration: "underline",
+              color: "#1976d2",
+            }}
+            onClick={() => handleTitleChange(task)}
+            title="Click to edit title"
+          >
+            {task.title}
+          </span>
+        )}
+        {!task.title && (
+          <span
+            style={{
+              cursor: "pointer",
+              textDecoration: "underline",
+              color: "#999",
+            }}
+            onCliclk={() => handleTitleChange(task)}
+            title="Click to add title"
+          >
+            No Title
+          </span>
+        )}
+      </TableCell>
+      <TableCell>
+        {task.description && (
+          <span
+            style={{
+              cursor: "pointer",
+              textDecoration: "underline",
+              color: "#1976d2",
+            }}
+            onClick={() => handleDescriptionChange(task)}
+            title="Click to edit description"
+          >
+            {task.description}
+          </span>
+        )}
+        {!task.description && (
+          <span
+            style={{
+              cursor: "pointer",
+              textDecoration: "underline",
+              color: "#999",
+            }}
+            onClick={() => handleDescriptionChange(task)}
+            title="Click to add description"
+          >
+            No Description
+          </span>
+        )}
+      </TableCell>
+      <TableCell>{task.assignee}</TableCell>
+      <TableCell>
+        <input
+          type="datetime-local"
+          value={task.due_date ? task.due_date.substring(0, 16) : ""}
+          onChange={(e) => handleDueDateChange(task.id, e.target.value)}
+          style={{ minWidth: 180 }}
+        />
+      </TableCell>
       <TableCell>
         {task.status !== "verified" && (
           <select
             value={task.status}
             onChange={(e) => handleStatusChange(task.id, e.target.value)}
           >
-            <option value="assigned">Assigned</option>
-            <option value="in_progress">In Progress</option>
-            <option value="completed">Completed</option>
+            <option value={currStatus}>{currStatus}</option>
+            <option value="verified">Verified</option>
           </select>
         )}
         {task.status === "verified" && <span>Verified</span>}
@@ -168,7 +241,7 @@ function HeadRow() {
       <TableCell>Id</TableCell>
       <TableCell>Title</TableCell>
       <TableCell>Description</TableCell>
-      <TableCell>Created By</TableCell>
+      <TableCell>Assignee</TableCell>
       <TableCell>Due Date</TableCell>
       <TableCell>Status</TableCell>
       <TableCell>Created At</TableCell>
@@ -177,11 +250,11 @@ function HeadRow() {
   );
 }
 
-const MyTaskListing = () => {
+const CreatedTaskListing = () => {
   const dispatch = useDispatch();
   const [filters, setFilters] = useState({
     title: "",
-    created_by: "",
+    assignee: "",
     from: "",
     to: "",
     status: "",
@@ -193,13 +266,19 @@ const MyTaskListing = () => {
   const [tasks, setTasks] = useState([]);
   const [taskFetching, setTaskFetching] = useState(false);
   const [selectedTasks, setSelectedTasks] = useState([]);
+  const [isTitleModalOpen, setIsTitleModalOpen] = useState(false);
+  const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
+  const [editTaskTitle, setEditTaskTitle] = useState("");
+  const [editTaskDescription, setEditTaskDescription] = useState("");
 
   const debouncedFilters = useDebounce(filters, 500);
   useEffect(() => {
     setTaskFetching(true);
-    listMyTasks(debouncedFilters)
+    listCreatedTasks(debouncedFilters)
       .then((response) => {
         setTasks(response.data.tasks);
+        console.log("Fetched tasks:", response.data.tasks);
         setTaskFetching(false);
       })
       .catch((error) => {
@@ -232,9 +311,70 @@ const MyTaskListing = () => {
       });
   };
 
+  const handleDueDateChange = (taskId, newDueDate) => {
+    updateTaskDueDate(taskId, newDueDate)
+      .then((response) => {
+        console.log("Task due date updated successfully:", response.data);
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.id === taskId ? { ...task, due_date: newDueDate } : task
+          )
+        );
+      })
+      .catch((error) => {
+        console.error("Failed to update task due date:", error);
+      });
+  };
+
+  const handleEditTitle = (task) => {
+    setSelectedTaskId(task.id);
+    setEditTaskTitle(task.title);
+    setIsTitleModalOpen(true);
+  };
+
+  const handleEditDescription = (task) => {
+    setSelectedTaskId(task.id);
+    setEditTaskDescription(task.description);
+    setIsDescriptionModalOpen(true);
+  };
+
+  const handleTitleSave = () => {
+    updateTaskTitle(selectedTaskId, editTaskTitle)
+      .then((response) => {
+        console.log("Task title updated successfully:", response.data);
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.id === selectedTaskId
+              ? { ...task, title: editTaskTitle }
+              : task
+          )
+        );
+      })
+      .catch((error) => {
+        console.error("Failed to update task title:", error);
+      });
+  };
+
+  const handleDescriptionSave = () => {
+    updateTaskDescription(selectedTaskId, editTaskDescription)
+      .then((response) => {
+        console.log("Task description updated successfully:", response.data);
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.id === selectedTaskId
+              ? { ...task, description: editTaskDescription }
+              : task
+          )
+        );
+      })
+      .catch((error) => {
+        console.error("Failed to update task description:", error);
+      });
+  };
+
   return (
     <div>
-      <h2 className="my-task-listing-title">My-Tasks-Listing</h2>
+      <h2 className="my-task-listing-title">My-Created-Tasks-Listing</h2>
       {/* <div style={{ marginBottom: "1rem" }}>
         <Button
           variant="outlined"
@@ -261,12 +401,60 @@ const MyTaskListing = () => {
                   task={task}
                   key={`${task.id}`}
                   handleStatusChange={handleStatusChange}
+                  handleDueDateChange={handleDueDateChange}
+                  handleTitleChange={handleEditTitle}
+                  handleDescriptionChange={handleEditDescription}
                 />
               ))}
           </TableBody>
+          <Modal
+            open={isTitleModalOpen}
+            onClose={() => setIsTitleModalOpen(false)}
+          >
+            {/* //Modal Header, Body and Footer// */}
+            <h3>Edit Title</h3>
+            <input
+              type="text"
+              name="title"
+              value={editTaskTitle}
+              onChange={(e) => setEditTaskTitle(e.target.value)}
+              style={{ width: "100%" }}
+            />
+            <div style={{ marginTop: "1rem" }}>
+              <button onClick={handleTitleSave}>Save</button>
+              <button
+                onClick={() => setIsTitleModalOpen(false)}
+                style={{ marginLeft: "1rem" }}
+              >
+                Cancel
+              </button>
+            </div>
+          </Modal>
+          <Modal
+            open={isDescriptionModalOpen}
+            onClose={() => setIsDescriptionModalOpen(false)}
+          >
+            <h3>Edit Description</h3>
+            <textarea
+              name="description"
+              value={editTaskDescription}
+              onChange={(e) => setEditTaskDescription(e.target.value)}
+              rows={4}
+              style={{ width: "100%" }}
+            />
+            <div style={{ marginTop: "1rem" }}>
+              <button onClick={handleDescriptionSave}>Save</button>
+              <button
+                onClick={() => setIsDescriptionModalOpen(false)}
+                style={{ marginLeft: "1rem" }}
+              >
+                Cancel
+              </button>
+            </div>
+          </Modal>
         </Table>
       </TableContainer>
     </div>
   );
 };
-export default MyTaskListing;
+export default CreatedTaskListing;
