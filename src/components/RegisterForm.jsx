@@ -177,9 +177,10 @@ let RegisterForm = ({
   error,
   registerUser,
   history,
+  isModal = false,
 }) => {
   const onSubmit = (values) => {
-    registerUser(values, history);
+    registerUser(values, history, isModal);
   };
 
   return (
@@ -246,8 +247,8 @@ const mapStateToProps = (state) => ({
   error: state.auth.error,
 });
 const mapDispatchToProps = (dispatch) => ({
-  registerUser: (formData, history) =>
-    dispatch(registerUser(formData, history)),
+  registerUser: (formData, history, isModal = false) =>
+    dispatch(registerUser(formData, history, isModal)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(RegisterForm);

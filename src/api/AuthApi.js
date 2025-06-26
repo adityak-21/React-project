@@ -19,8 +19,14 @@ export const logout = () =>
     }
   );
 
-export const register = (requestBody) =>
-  axios.post(`${BASE_URL}/register`, requestBody);
+export const register = (requestBody, withAuth = true) => {
+  const headers =
+    withAuth && localStorage.getItem("access_token")
+      ? { Authorization: `Bearer ${localStorage.getItem("access_token")}` }
+      : {};
+  // console.log("headers", headers);
+  return axios.post(`${BASE_URL}/register`, requestBody, { headers });
+};
 
 export const verifyToken = () =>
   axios.post(
@@ -33,8 +39,8 @@ export const verifyToken = () =>
     }
   );
 
-export const verifyAdmin = () =>
-  axios.post(
+export const verifyAdmin = () => {
+  return axios.post(
     `${BASE_URL}/isAdmin`,
     {},
     {
@@ -43,3 +49,4 @@ export const verifyAdmin = () =>
       },
     }
   );
+};

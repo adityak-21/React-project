@@ -6,7 +6,7 @@ import * as IoIcons from "react-icons/io";
 export const SidebarData = [
   {
     title: "User-Listing",
-    path: "/dashboard",
+    path: "/userListing",
     icon: <AiIcons.AiFillHome />,
     cName: "nav-text",
   },
@@ -15,5 +15,18 @@ export const SidebarData = [
     path: "/userActivity",
     icon: <IoIcons.IoIosPaper />,
     cName: "nav-text",
+  },
+  {
+    title: "My-Tasks",
+    path: "/myTasks",
+    icon: <FaIcons.FaTasks />,
+    cName: "nav-text",
+  },
+  {
+    title: "All-Tasks",
+    path: "/allTasks",
+    icon: <FaIcons.FaTasks />,
+    cName: "nav-text",
+    adminOnly: true,
   },
 ];

@@ -14,7 +14,7 @@ import { LoaderRow } from "../common/Loading";
 
 function ActivityFilterForm({ filters, handleInputChange }) {
   return (
-    <form className="dashboard-search-form" style={{ marginBottom: "1rem" }}>
+    <form className="user-listing-search-form" style={{ marginBottom: "1rem" }}>
       <Tooltip text="Write name to search by name">
         <input
           type="text"

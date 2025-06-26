@@ -5,11 +5,16 @@ import "../style/LoginForm.css";
 import { withRouter } from "react-router-dom";
 import { login } from "../api/AuthApi";
 import Swal from "sweetalert2";
+import { useDispatch, useSelector } from "react-redux";
+import { verifyAdminStatus } from "../redux/verifyAdmin";
+import { verifyAdmin } from "../api/AuthApi";
 
 const LoginForm = () => {
   const history = useHistory();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const dispatch = useDispatch();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -20,9 +25,10 @@ const LoginForm = () => {
     login(requestBody)
       .then((response) => {
         localStorage.setItem("access_token", response.data.access_token);
-        console.log(response.data);
-        
-        history.push("/dashboard");
+        // console.log(response.data);
+        dispatch(verifyAdminStatus(verifyAdmin));
+
+        history.push("/userListing");
       })
       .catch((error) => {
         console.error("Login failed:", error);

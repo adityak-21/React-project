@@ -22,7 +22,13 @@ export function verifyAdminReducer(state = initialState, action) {
     case VERIFY_ADMIN_SUCCESS:
       return { ...state, verifying: false, isAdmin: true, viewAsAdmin: true };
     case VERIFY_ADMIN_FAILURE:
-      return { ...state, verifying: false, error: action.error };
+      return {
+        ...state,
+        verifying: false,
+        isAdmin: false,
+        viewAsAdmin: false,
+        error: action.error,
+      };
     default:
       return state;
   }
@@ -40,11 +46,13 @@ export const setViewAsAdmin = (viewAsAdmin) => ({
 
 export const verifyAdminStatus = (verifyAdminApi) => (dispatch) => {
   dispatch({ type: VERIFY_ADMIN_REQUEST });
-  return verifyAdminApi()
+  verifyAdminApi()
     .then(() => {
+      console.log("Admin verification successful");
       dispatch({ type: VERIFY_ADMIN_SUCCESS });
     })
     .catch((error) => {
+      console.error("Admin verification failed");
       dispatch({
         type: VERIFY_ADMIN_FAILURE,
         error: error.message || "Verification failed",

@@ -6,7 +6,7 @@ import Swal from "sweetalert2";
 const LoginPage = () => {
   const history = useHistory();
   const handleSuccessfulLogin = () => {
-    history.push("/dashboard");
+    history.push("/userListing");
   };
   const handleFailedLogin = (error) => {
     console.error("Login failed:", error);
@@ -25,7 +25,7 @@ const LoginPage = () => {
         apiUrl="http://localhost:8000/api/v1/login"
         onSuccess={handleSuccessfulLogin}
         onError={handleFailedLogin}
-        redirectPath="/dashboard"
+        redirectPath="/userListing"
         history={history}
       />
     </div>
