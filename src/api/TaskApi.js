@@ -114,6 +114,14 @@ export function updateTaskDescription(taskId, description) {
   );
 }
 
+export function createTask(requestBody) {
+  return axios.post(`${BASE_URL}/createTask`, requestBody, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+    },
+  });
+}
+
 // export const deleteTasks = (taskIds) =>
 //   axios.post(
 //     `${BASE_URL}/bulkdeleteTasks`,

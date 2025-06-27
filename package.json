@@ -11,6 +11,8 @@
     "@testing-library/user-event": "^12.8.3",
     "axios": "^1.10.0",
     "bootstrap": "^5.3.6",
+    "highcharts": "^12.3.0",
+    "highcharts-react-official": "^3.2.2",
     "prop-types": "^15.8.1",
     "react": "^16.14.0",
     "react-bootstrap": "^1.6.6",

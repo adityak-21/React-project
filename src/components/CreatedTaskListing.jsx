@@ -15,6 +15,9 @@ import { Tooltip } from "../common/Tooltip";
 import { updateTaskStatus } from "../api/TaskApi";
 import { updateTaskDueDate } from "../api/TaskApi";
 import { updateTaskDescription } from "../api/TaskApi";
+import { Button } from "@material-ui/core";
+import { listUsers } from "../api/UserApi";
+import { createTask } from "../api/TaskApi";
 
 import { LoaderRow } from "../common/Loading";
 import "../style/MyTaskListing.css";
@@ -271,6 +274,17 @@ const CreatedTaskListing = () => {
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [editTaskTitle, setEditTaskTitle] = useState("");
   const [editTaskDescription, setEditTaskDescription] = useState("");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newTask, setNewTask] = useState({
+    title: "",
+    description: "",
+    due_date: "",
+    assignee_id: "",
+  });
+  const [assigneeSearch, setAssigneeSearch] = useState("");
+  const [assigneeOptions, setAssigneeOptions] = useState([]);
+  const [assigneeLoading, setAssigneeLoading] = useState(false);
+  const debouncedAssigneeSearch = useDebounce(assigneeSearch, 400);
 
   const debouncedFilters = useDebounce(filters, 500);
   useEffect(() => {
@@ -286,6 +300,17 @@ const CreatedTaskListing = () => {
         setTaskFetching(false);
       });
   }, [debouncedFilters]);
+
+  useEffect(() => {
+    if (!isCreateModalOpen) return;
+    setAssigneeLoading(true);
+    listUsers({ name: debouncedAssigneeSearch })
+      .then((response) => {
+        setAssigneeOptions(response.data.users || []);
+        setAssigneeLoading(false);
+      })
+      .catch(() => setAssigneeLoading(false));
+  }, [debouncedAssigneeSearch, isCreateModalOpen]);
 
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;
@@ -372,6 +397,41 @@ const CreatedTaskListing = () => {
       });
   };
 
+  const handleNewTaskChange = (e) => {
+    const { name, value } = e.target;
+    setNewTask((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleAssigneeSearch = (e) => setAssigneeSearch(e.target.value);
+
+  const handleSelectAssignee = (userId) => {
+    setNewTask((prev) => ({ ...prev, assignee_id: userId }));
+  };
+
+  const handleCreateTaskSave = () => {
+    if (!newTask.title.trim()) {
+      alert("Title is required");
+      return;
+    }
+    createTask(newTask)
+      .then(() => {
+        setIsCreateModalOpen(false);
+        setNewTask({
+          title: "",
+          description: "",
+          due_date: "",
+          assignee_id: "",
+        });
+        setFilters({ ...filters });
+      })
+      .catch((err) => {
+        alert("Failed to create task");
+      });
+  };
+
   return (
     <div>
       <h2 className="my-task-listing-title">My-Created-Tasks-Listing</h2>
@@ -385,6 +445,16 @@ const CreatedTaskListing = () => {
           Download CSV
         </Button>
       </div> */}
+      <div style={{ marginBottom: "1rem" }}>
+        <Button
+          variant="outlined"
+          color="default"
+          onClick={() => setIsCreateModalOpen(true)}
+          style={{ marginRight: "1rem" }}
+        >
+          Create Task
+        </Button>
+      </div>
       <TaskFilterForm filters={filters} handleInputChange={handleInputChange} />
       <TableContainer component={Paper}>
         <Table>
@@ -407,53 +477,160 @@ const CreatedTaskListing = () => {
                 />
               ))}
           </TableBody>
-          <Modal
-            open={isTitleModalOpen}
-            onClose={() => setIsTitleModalOpen(false)}
-          >
-            {/* //Modal Header, Body and Footer// */}
-            <h3>Edit Title</h3>
-            <input
-              type="text"
-              name="title"
-              value={editTaskTitle}
-              onChange={(e) => setEditTaskTitle(e.target.value)}
-              style={{ width: "100%" }}
-            />
-            <div style={{ marginTop: "1rem" }}>
-              <button onClick={handleTitleSave}>Save</button>
-              <button
-                onClick={() => setIsTitleModalOpen(false)}
-                style={{ marginLeft: "1rem" }}
-              >
-                Cancel
-              </button>
-            </div>
-          </Modal>
-          <Modal
-            open={isDescriptionModalOpen}
-            onClose={() => setIsDescriptionModalOpen(false)}
-          >
-            <h3>Edit Description</h3>
-            <textarea
-              name="description"
-              value={editTaskDescription}
-              onChange={(e) => setEditTaskDescription(e.target.value)}
-              rows={4}
-              style={{ width: "100%" }}
-            />
-            <div style={{ marginTop: "1rem" }}>
-              <button onClick={handleDescriptionSave}>Save</button>
-              <button
-                onClick={() => setIsDescriptionModalOpen(false)}
-                style={{ marginLeft: "1rem" }}
-              >
-                Cancel
-              </button>
-            </div>
-          </Modal>
         </Table>
       </TableContainer>
+      <Modal open={isTitleModalOpen} onClose={() => setIsTitleModalOpen(false)}>
+        {/* //Modal Header, Body and Footer// */}
+        <h3>Edit Title</h3>
+        <input
+          type="text"
+          name="title"
+          value={editTaskTitle}
+          onChange={(e) => setEditTaskTitle(e.target.value)}
+          style={{ width: "100%" }}
+        />
+        <div style={{ marginTop: "1rem" }}>
+          <button onClick={handleTitleSave}>Save</button>
+          <button
+            onClick={() => setIsTitleModalOpen(false)}
+            style={{ marginLeft: "1rem" }}
+          >
+            Cancel
+          </button>
+        </div>
+      </Modal>
+      <Modal
+        open={isDescriptionModalOpen}
+        onClose={() => setIsDescriptionModalOpen(false)}
+      >
+        <h3>Edit Description</h3>
+        <textarea
+          name="description"
+          value={editTaskDescription}
+          onChange={(e) => setEditTaskDescription(e.target.value)}
+          rows={4}
+          style={{ width: "100%" }}
+        />
+        <div style={{ marginTop: "1rem" }}>
+          <button onClick={handleDescriptionSave}>Save</button>
+          <button
+            onClick={() => setIsDescriptionModalOpen(false)}
+            style={{ marginLeft: "1rem" }}
+          >
+            Cancel
+          </button>
+        </div>
+      </Modal>
+      <Modal
+        open={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      >
+        <h3>Create New Task</h3>
+        <form>
+          <div>
+            <label>
+              Title <span style={{ color: "red" }}>*</span>
+              <input
+                type="text"
+                name="title"
+                value={newTask.title}
+                onChange={handleNewTaskChange}
+                required
+                maxLength={255}
+                style={{ width: "100%" }}
+              />
+            </label>
+          </div>
+          <div>
+            <label>
+              Description
+              <textarea
+                name="description"
+                value={newTask.description}
+                onChange={handleNewTaskChange}
+                rows={3}
+                style={{ width: "100%" }}
+              />
+            </label>
+          </div>
+          <div>
+            <label>
+              Due Date
+              <input
+                type="datetime-local"
+                name="due_date"
+                value={newTask.due_date}
+                onChange={handleNewTaskChange}
+                style={{ width: "100%", marginBottom: "0.7rem" }}
+              />
+            </label>
+          </div>
+          <div>
+            <label>
+              Assignee <span style={{ color: "red" }}>*</span>
+              <input
+                type="text"
+                placeholder="Search user..."
+                value={assigneeSearch}
+                onChange={handleAssigneeSearch}
+                required
+                style={{ width: "100%" }}
+              />
+              <div
+                style={{
+                  maxHeight: 120,
+                  overflowY: "auto",
+                  border: "1px solid #ddd",
+                  marginTop: 2,
+                }}
+              >
+                {assigneeLoading ? (
+                  <div>Loading...</div>
+                ) : (
+                  assigneeOptions.map((u, idx) => (
+                    <div
+                      key={`${u.id}-${idx}`}
+                      style={{
+                        padding: 4,
+                        background:
+                          newTask.assignee_id === u.id ? "#e0e0e0" : "#fff",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => handleSelectAssignee(u.id)}
+                    >
+                      {u.name} ({u.email})
+                    </div>
+                  ))
+                )}
+                {assigneeOptions.length === 0 && !assigneeLoading && (
+                  <div>No users found</div>
+                )}
+              </div>
+              {newTask.assignee_id && (
+                <div style={{ fontSize: 12, color: "#388e3c", marginTop: 2 }}>
+                  Selected:{" "}
+                  {
+                    assigneeOptions.find((u) => u.id === newTask.assignee_id)
+                      ?.name
+                  }
+                </div>
+              )}
+            </label>
+          </div>
+          <div style={{ marginTop: "1rem" }}>
+            <button type="button" onClick={handleCreateTaskSave}>
+              Create
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsCreateModalOpen(false)}
+              style={{ marginLeft: 8 }}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };
