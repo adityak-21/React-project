@@ -23,6 +23,11 @@ import {
 import { verifyAdmin } from "../api/AuthApi";
 import { deleteUsers } from "../api/UserApi";
 import RegisterModal from "../common/RegisterModal";
+import EditIcon from "@material-ui/icons/Edit";
+import IconButton from "@material-ui/core/IconButton";
+import { updateUserName } from "../api/UserApi";
+import { listRoles, assignUserRoles, removeUserRole } from "../api/RoleApi";
+
 /**
  * debounce                                             done
  * Modal implement replace Swal
@@ -94,7 +99,16 @@ function UserFilterForm({ filters, handleInputChange }) {
   );
 }
 
-function UserTableRow({ user, isAdmin, checked, onCheck, onDelete }) {
+function UserTableRow({
+  user,
+  isAdmin,
+  checked,
+  onCheck,
+  onDelete,
+  onEdit,
+  onEditRoles,
+  onRemoveRole,
+}) {
   return (
     <TableRow>
       {isAdmin && (
@@ -103,9 +117,52 @@ function UserTableRow({ user, isAdmin, checked, onCheck, onDelete }) {
         </TableCell>
       )}
       <TableCell>{user.id}</TableCell>
-      <TableCell>{user.name}</TableCell>
+      <TableCell>
+        <span>{user.name}</span>
+        {isAdmin && (
+          <IconButton
+            size="small"
+            style={{ marginLeft: 6 }}
+            onClick={() => onEdit(user)}
+            aria-label="Edit Name"
+          >
+            <EditIcon fontSize="small" />
+          </IconButton>
+        )}
+      </TableCell>
       <TableCell>{user.email}</TableCell>
-      <TableCell>{user.role}</TableCell>
+      {/* <TableCell>{user.role}</TableCell> */}
+      <TableCell>
+        {user.roles && user.roles.length > 0 ? (
+          user.roles.map((role) => (
+            <span key={role.id} style={{ marginRight: 6 }}>
+              {role.name}
+              {isAdmin && (
+                <IconButton
+                  size="small"
+                  onClick={() => onRemoveRole(user.id, role.id)}
+                  style={{ marginLeft: 2 }}
+                  aria-label="Remove Role"
+                >
+                  ✕
+                </IconButton>
+              )}
+            </span>
+          ))
+        ) : (
+          <em>No roles</em>
+        )}
+        {isAdmin && (
+          <Button
+            size="small"
+            variant="outlined"
+            style={{ marginLeft: 8 }}
+            onClick={() => onEditRoles(user)}
+          >
+            Edit Roles
+          </Button>
+        )}
+      </TableCell>
       <TableCell>{user.created_by}</TableCell>
       <TableCell>{user.created_at}</TableCell>
       <TableCell>{user.updated_at}</TableCell>
@@ -155,6 +212,15 @@ function HeadRow({ isAdmin, allChecked, onCheckAll }) {
   );
 }
 
+function uniqueUsersById(users) {
+  const seen = new Set();
+  return users.filter((user) => {
+    if (seen.has(user.id)) return false;
+    seen.add(user.id);
+    return true;
+  });
+}
+
 const UserListing = () => {
   const dispatch = useDispatch();
   const { isAdmin, viewAsAdmin, verifying } = useSelector(
@@ -172,7 +238,13 @@ const UserListing = () => {
   //   const [viewAsAdmin, setViewAsAdmin] = useState(false);
   const [userFetching, setUserFetching] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState([]);
+  const [editUser, setEditUser] = useState(null);
+  const [editName, setEditName] = useState("");
   const debouncedFilters = useDebounce(filters, 500);
+  const [allRoles, setAllRoles] = useState([]);
+  const [editRolesUser, setEditRolesUser] = useState(null);
+  const [selectedRoles, setSelectedRoles] = useState([]);
+  const [savingRoles, setSavingRoles] = useState(false);
 
   //useEffect
   // first time render - componentDidMount
@@ -184,8 +256,13 @@ const UserListing = () => {
     listUsers(debouncedFilters)
       .then((res) => {
         console.log(res.data);
-        setUsers(res.data.users);
+        const unique = uniqueUsersById(res.data.users);
+        setUsers(unique);
         setUserFetching(false);
+        listRoles().then((res) => {
+          console.log("Roles fetched:", res.data.roles);
+          setAllRoles(res.data.roles || []);
+        });
       })
       .catch((err) => {
         console.error(err);
@@ -290,6 +367,77 @@ const UserListing = () => {
       });
   };
 
+  const openEditName = (user) => {
+    setEditUser(user);
+    setEditName(user.name);
+  };
+  const closeEditName = () => {
+    setEditUser(null);
+    setEditName("");
+  };
+
+  const openEditRoles = (user) => {
+    setEditRolesUser(user);
+    setSelectedRoles(user.roles ? user.roles.map((r) => r.id) : []);
+  };
+  const closeEditRoles = () => {
+    setEditRolesUser(null);
+    setSelectedRoles([]);
+  };
+
+  const handleSaveName = () => {
+    updateUserName(editUser.id, editName)
+      .then((res) => {
+        setUsers((prev) =>
+          prev.map((u) => (u.id === editUser.id ? { ...u, name: editName } : u))
+        );
+        closeEditName();
+        Swal.fire("Success", "Name updated!", "success");
+      })
+      .catch(() => {
+        Swal.fire("Error", "Failed to update name", "error");
+      });
+  };
+
+  const handleSaveRoles = () => {
+    setSavingRoles(true);
+    assignUserRoles(editRolesUser.id, selectedRoles)
+      .then(() => {
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.id === editRolesUser.id
+              ? {
+                  ...u,
+                  roles: allRoles.filter((r) => selectedRoles.includes(r.id)),
+                }
+              : u
+          )
+        );
+        closeEditRoles();
+        Swal.fire("Success", "Roles updated!", "success");
+      })
+      .catch(() => {
+        Swal.fire("Error", "Failed to update roles", "error");
+      })
+      .finally(() => setSavingRoles(false));
+  };
+
+  const handleRemoveRole = (userId, roleId) => {
+    console.log("Removing role", roleId, "from user", userId);
+    removeUserRole(userId, roleId)
+      .then(() => {
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.id === userId
+              ? { ...u, roles: u.roles.filter((r) => r.id !== roleId) }
+              : u
+          )
+        );
+        Swal.fire("Success", "Role removed", "success");
+      })
+      .catch(() => Swal.fire("Error", "Failed to remove role", "error"));
+  };
+
   const allChecked = users.length > 0 && selectedUsers.length === users.length;
   //why inline style is avoided ?
   return (
@@ -373,11 +521,88 @@ const UserListing = () => {
                   checked={selectedUsers.includes(user.id)}
                   onCheck={handleCheck}
                   onDelete={handleDelete}
+                  onEdit={openEditName}
+                  onEditRoles={openEditRoles}
+                  onRemoveRole={handleRemoveRole}
                 />
               ))}
           </TableBody>
         </Table>
       </TableContainer>
+      {isAdmin && editUser && (
+        <div className="modal-backdrop">
+          <div className="modal-content">
+            <h3>Edit Name</h3>
+            <input
+              type="text"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              style={{ width: "100%", marginBottom: 12 }}
+              maxLength={100}
+              autoFocus
+            />
+            <div>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSaveName}
+                style={{ marginRight: 8 }}
+                disabled={editName.trim() === ""}
+              >
+                Save
+              </Button>
+              <Button variant="outlined" onClick={closeEditName}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      {isAdmin && editRolesUser && (
+        <div className="modal-backdrop">
+          <div className="modal-content">
+            <h3>Edit Roles for {editRolesUser.name}</h3>
+            <div style={{ marginBottom: 12, width: "300px" }}>
+              <select
+                multiple
+                value={selectedRoles}
+                onChange={(e) =>
+                  setSelectedRoles(
+                    Array.from(e.target.selectedOptions, (opt) =>
+                      Number(opt.value)
+                    )
+                  )
+                }
+                style={{ width: "100%", minHeight: "100px" }}
+              >
+                {allRoles.map((role) => (
+                  <option key={role.id} value={role.id}>
+                    {role.role}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSaveRoles}
+                style={{ marginRight: 8 }}
+                disabled={savingRoles}
+              >
+                Save
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={closeEditRoles}
+                disabled={savingRoles}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

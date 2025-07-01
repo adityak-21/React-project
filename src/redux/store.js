@@ -10,8 +10,7 @@ const rootReducer = combineReducers({
   auth: authReducer,
   form: formReducer,
   admin: verifyAdminReducer,
-
-  //   users: userReducer,
+  user: userReducer,
 });
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

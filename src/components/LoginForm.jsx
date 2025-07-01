@@ -8,6 +8,12 @@ import Swal from "sweetalert2";
 import { useDispatch, useSelector } from "react-redux";
 import { verifyAdminStatus } from "../redux/verifyAdmin";
 import { verifyAdmin } from "../api/AuthApi";
+import {
+  setUserName,
+  setUserEmail,
+  setUserId,
+  setUserRoles,
+} from "../redux/userReducer";
 
 const LoginForm = () => {
   const history = useHistory();
@@ -27,8 +33,12 @@ const LoginForm = () => {
         localStorage.setItem("access_token", response.data.access_token);
         // console.log(response.data);
         dispatch(verifyAdminStatus(verifyAdmin));
+        dispatch(setUserName(response.data.user.name));
+        dispatch(setUserEmail(response.data.user.email));
+        dispatch(setUserId(response.data.user.id));
+        dispatch(setUserRoles(response.data.user.roles));
 
-        history.push("/userListing");
+        history.push("/dashboard");
       })
       .catch((error) => {
         console.error("Login failed:", error);

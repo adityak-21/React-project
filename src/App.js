@@ -7,12 +7,14 @@ import {
   useLocation,
 } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
+import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
 import UserListing from "./components/UserListing";
 import PrivateRoute from "./components/PrivateRoute";
 import UserActivity from "./components/UserActivity";
 import Navbar from "./common/Navbar";
 import Logout from "./components/Logout";
+import Topbar from "./common/Topbar";
 import { useDispatch, useSelector } from "react-redux";
 import { verifyAdminStatus } from "./redux/verifyAdmin";
 import { verifyAdmin } from "./api/AuthApi";
@@ -21,9 +23,22 @@ import AdminRoute from "./components/AdminRoute";
 import AllTaskListing from "./components/AllTaskListing";
 import CreatedTaskListing from "./components/CreatedTaskListing";
 import Dashboard from "./components/Dashboard";
+import {
+  PusherListener,
+  PusherListenerPrivate,
+} from "./components/PusherListener";
+import SendMessage from "./components/SendMessages";
+import { me } from "./api/AuthApi";
+import {
+  setUserName,
+  setUserEmail,
+  setUserId,
+  setUserRoles,
+} from "./redux/userReducer";
 
 function AppContent() {
   const location = useLocation();
+  const [id, setId] = useState(null);
   const hideNavbar = ["/login", "/register"].includes(location.pathname);
 
   const [sidebar, setSidebar] = useState(false);
@@ -32,9 +47,26 @@ function AppContent() {
   useEffect(() => {
     dispatch(verifyAdminStatus(verifyAdmin));
   }, [dispatch]);
+  useEffect(() => {
+    me()
+      .then((response) => {
+        dispatch(setUserName(response.data.name));
+        dispatch(setUserEmail(response.data.email));
+        dispatch(setUserId(response.data.id));
+        dispatch(setUserRoles(response.data.roles));
+        setId(response.data.id);
+        console.log("User data fetched successfully:", response.data);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch user data:", error);
+      });
+  }, [dispatch]);
 
   return (
     <>
+      {!hideNavbar && <Topbar />}
+      {!hideNavbar && <PusherListener />}
+      {!hideNavbar && id && <PusherListenerPrivate userId={id} />}
       {!hideNavbar && <Navbar sidebar={sidebar} setSidebar={setSidebar} />}
       <div
         className="main-content"
@@ -44,13 +76,14 @@ function AppContent() {
         }}
       >
         <Switch>
-          <Route path="/login" component={LoginPage} />
+          <Route path="/login" component={LoginForm} />
           <Route path="/register" component={RegisterForm} />
           <PrivateRoute path="/userListing" component={UserListing} />
           <PrivateRoute path="/userActivity" component={UserActivity} />
           <PrivateRoute path="/myTasks" component={MyTaskListing} />
           <PrivateRoute path="/createdTasks" component={CreatedTaskListing} />
           <PrivateRoute path="/dashboard" component={Dashboard} />
+          <PrivateRoute path="/sendMessage" component={SendMessage} />
           <AdminRoute path="/allTasks" component={AllTaskListing} />
           <Route path="/logout" component={Logout} />
           <Redirect from="/" to="/login" />

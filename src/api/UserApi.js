@@ -46,3 +46,14 @@ export const deleteUsers = (userIds) =>
       },
     }
   );
+
+export const updateUserName = (userId, name) =>
+  axios.post(
+    `${BASE_URL}/update-name/${userId}`,
+    { name },
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    }
+  );

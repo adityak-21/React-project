@@ -2,9 +2,9 @@ import axios from "axios";
 
 const BASE_URL = "http://localhost:8000/api/v1";
 
-export const myTaskStatusStats = () =>
+export const listRoles = () =>
   axios.post(
-    `${BASE_URL}/myTaskStatusStatistics`,
+    `${BASE_URL}/roles`,
     {},
     {
       headers: {
@@ -13,10 +13,10 @@ export const myTaskStatusStats = () =>
     }
   );
 
-export const averageCompletionTime = () =>
+export const assignUserRoles = (userId, roleIds) =>
   axios.post(
-    `${BASE_URL}/averageCompletionTime`,
-    {},
+    `${BASE_URL}/users/${userId}/roles`,
+    { roles: roleIds },
     {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -24,20 +24,9 @@ export const averageCompletionTime = () =>
     }
   );
 
-export const assignedVsCreated = () =>
+export const removeUserRole = (userId, roleId) =>
   axios.post(
-    `${BASE_URL}/assignedVsCreated`,
-    {},
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      },
-    }
-  );
-
-export const oldestOpenTasks = () =>
-  axios.post(
-    `${BASE_URL}/oldestOpenTasks`,
+    `${BASE_URL}/users/${userId}/roles/${roleId}`,
     {},
     {
       headers: {

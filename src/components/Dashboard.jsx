@@ -1,35 +1,65 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
-import { me } from "../api/AuthApi";
-import { myTaskStatusStats } from "../api/AnalyticsApi";
+import {
+  myTaskStatusStats,
+  averageCompletionTime,
+  assignedVsCreated,
+  oldestOpenTasks,
+} from "../api/AnalyticsApi";
 import { useEffect, useState, useMemo } from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import "../style/Dashboard.css";
+import { useSelector } from "react-redux";
 
 const Dashboard = () => {
-  const [user, setUser] = useState(null);
   const [myTasks, setMyTasks] = useState([]);
-  const [createdTasks, setCreatedTasks] = useState([]);
+  const [avgCompletion, setAvgCompletion] = useState({});
+  const [assignedCreated, setAssignedCreated] = useState({});
+  const [oldestOpen, setOldestOpen] = useState([]);
+  const history = useHistory();
+  const userName = useSelector((state) => state.user.userName);
+  const userEmail = useSelector((state) => state.user.userEmail);
+  const userId = useSelector((state) => state.user.userId);
+  const userRoles = useSelector((state) => state.user.userRoles);
   useEffect(() => {
-    me()
+    myTaskStatusStats()
       .then((response) => {
-        setUser(response.data);
-        myTaskStatusStats()
-          .then((response) => {
-            setMyTasks(response.data);
-            console.log(
-              "Task status stats fetched successfully:",
-              response.data
-            );
-          })
-          .catch((error) => {
-            console.error("Failed to fetch task status stats:", error);
-          });
-        console.log("User data fetched successfully:", response.data);
+        setMyTasks(response.data);
+        console.log("Task status stats fetched successfully:", response.data);
       })
       .catch((error) => {
-        console.error("Failed to fetch user data:", error);
+        console.error("Failed to fetch task status stats:", error);
+      });
+    averageCompletionTime()
+      .then((response) => {
+        setAvgCompletion(response.data);
+        console.log(
+          "Average completion time fetched successfully:",
+          response.data
+        );
+      })
+      .catch((error) => {
+        console.error("Failed to fetch average completion time:", error);
+      });
+    assignedVsCreated()
+      .then((response) => {
+        setAssignedCreated(response.data);
+        console.log(
+          "Assigned vs Created tasks fetched successfully:",
+          response.data
+        );
+      })
+      .catch((error) => {
+        console.error("Failed to fetch assigned vs created tasks:", error);
+      });
+    oldestOpenTasks()
+      .then((response) => {
+        setOldestOpen(response.data);
+        console.log("Oldest open tasks fetched successfully:", response.data);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch oldest open tasks:", error);
       });
   }, []);
 
@@ -47,41 +77,100 @@ const Dashboard = () => {
       series: [{ name: "Tasks", colorByPoint: true, data: pieData }],
     };
   }, [myTasks]);
-  const roleNames = user?.roles?.map((role) => role.role);
+  const roleNames = userRoles.map((role) => role.role);
+
+  const avgCompletionOptions = useMemo(() => {
+    const avgCompletionData = avgCompletion.average_completion_time || {};
+    const months = Object.keys(avgCompletionData);
+    return {
+      chart: { type: "column" },
+      title: { text: "Avg. Completion Time (Days)" },
+      xAxis: { categories: months, title: { text: "Month" } },
+      yAxis: { min: 0, allowDecimals: true, title: { text: "Average Days" } },
+      series: [
+        {
+          name: "Avg Days",
+          data: months.map((m) => avgCompletionData[m]),
+        },
+      ],
+      credits: { enabled: false },
+    };
+  }, [avgCompletion]);
+
+  const assignedCreatedOptions = useMemo(
+    () => ({
+      chart: { type: "column" },
+      title: { text: "Tasks: Assigned to Me vs. Created by Me" },
+      xAxis: { categories: ["Assigned to Me", "Created by Me"] },
+      yAxis: { min: 0, allowDecimals: false, title: { text: "Tasks" } },
+      series: [
+        {
+          name: "Tasks",
+          data: [
+            assignedCreated.assigned_to_me || 0,
+            assignedCreated.created_by_me || 0,
+          ],
+        },
+      ],
+      credits: { enabled: false },
+    }),
+    [assignedCreated]
+  );
+
+  const oldestOpenOptions = useMemo(
+    () => ({
+      chart: { type: "bar" },
+      title: { text: "Top 5 Oldest Open Tasks" },
+      xAxis: { categories: oldestOpen.map((t) => t.title || `Task ${t.id}`) },
+      yAxis: { min: 0, allowDecimals: false, title: { text: "Days Open" } },
+      series: [
+        {
+          name: "Days Open",
+          data: oldestOpen.map((t) => t.days_open),
+        },
+      ],
+      credits: { enabled: false },
+    }),
+    [oldestOpen]
+  );
+
+  const handleSummaryCardClick = (status) => {
+    history.push(`/myTasks?status=${status}`);
+  };
 
   return (
-    <div className="container" style={{ maxWidth: 600, marginTop: 100 }}>
-      {user ? (
-        <div>
-          <h2>Welcome, {user.name}!</h2>
-          <p>Id: {user.id}</p>
-          <p>Email: {user.email}</p>
-          <p>Roles: {roleNames.join(", ")}</p>
-        </div>
-      ) : (
-        <p>Loading user data...</p>
-      )}
+    <div className="container" style={{ maxWidth: 900, marginTop: 50 }}>
+      <div>
+        <h2>Welcome, {userName}!</h2>
+        <p>Id: {userId}</p>
+        <p>Email: {userEmail}</p>
+        <p>Roles: {roleNames.join(", ")}</p>
+      </div>
 
       <div className="task-summary-slab">
         <SummaryCard
           color="#2d6cdf"
           label="Assigned"
           value={myTasks.assigned}
+          onClick={() => handleSummaryCardClick("assigned")}
         />
         <SummaryCard
           color="#f0ad4e"
           label="In Progress"
           value={myTasks.in_progress}
+          onClick={() => handleSummaryCardClick("in_progress")}
         />
         <SummaryCard
           color="#5cb85c"
           label="Completed"
           value={myTasks.completed}
+          onClick={() => handleSummaryCardClick("completed")}
         />
         <SummaryCard
           color="#17a2b8"
           label="Verified"
           value={myTasks.verified}
+          onClick={() => handleSummaryCardClick("verified")}
         />
         <SummaryCard color="#ff4a4a" label="Overdue" value={myTasks.overdue} />
         <SummaryCard
@@ -91,20 +180,50 @@ const Dashboard = () => {
         />
       </div>
 
-      <HighchartsReact
-        highcharts={Highcharts}
-        options={options}
-        style={{ width: "100%", height: "400px" }}
-      >
-        {" "}
-      </HighchartsReact>
+      <div className="dashboard-charts">
+        <HighchartsReact
+          highcharts={Highcharts}
+          options={options}
+          style={{ width: "100%", height: "400px" }}
+        >
+          {" "}
+        </HighchartsReact>
+        <HighchartsReact
+          highcharts={Highcharts}
+          options={avgCompletionOptions}
+          style={{ width: "100%", height: "400px", marginTop: "20px" }}
+        />
+        <HighchartsReact
+          highcharts={Highcharts}
+          options={assignedCreatedOptions}
+          style={{ width: "100%", height: "400px", marginTop: "20px" }}
+        />
+        <HighchartsReact
+          highcharts={Highcharts}
+          options={oldestOpenOptions}
+          style={{ width: "100%", height: "400px", marginTop: "20px" }}
+        />
+      </div>
     </div>
   );
 };
 
-function SummaryCard({ label, value, color }) {
+function SummaryCard({ label, value, color, onClick }) {
   return (
-    <div className="summary-card" style={{ borderColor: color }}>
+    <div
+      className="summary-card"
+      style={{ borderColor: color, cursor: onClick ? "pointer" : "default" }}
+      onClick={onClick}
+      tabIndex={onClick ? 0 : undefined}
+      role={onClick ? "button" : undefined}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === "Enter") onClick();
+            }
+          : undefined
+      }
+    >
       <div className="summary-value" style={{ color }}>
         {value}
       </div>

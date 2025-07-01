@@ -41,4 +41,10 @@ export const SidebarData = [
     cName: "nav-text",
     adminOnly: true,
   },
+  {
+    title: "Send Message",
+    path: "/sendMessage",
+    icon: <IoIcons.IoIosSend />,
+    cName: "nav-text",
+  },
 ];

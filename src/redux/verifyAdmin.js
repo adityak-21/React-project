@@ -10,7 +10,13 @@ const initialState = {
   verifying: false,
   error: null,
 };
-
+// selector
+// createSeletor
+// caching
+// itemsByid - [1: {id: 1, name: "item1"}, 2: {id: 2, name: "item2"}]
+// items - [1,2 3]
+// Promise - Promise.all([promise1, promise2])
+// const getItems = (state) => state.items;
 export function verifyAdminReducer(state = initialState, action) {
   switch (action.type) {
     case SET_ADMIN:

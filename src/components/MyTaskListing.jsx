@@ -13,6 +13,7 @@ import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import { Tooltip } from "../common/Tooltip";
 import { updateTaskStatus } from "../api/TaskApi";
+import { useLocation } from "react-router-dom";
 
 import { LoaderRow } from "../common/Loading";
 import "../style/MyTaskListing.css";
@@ -178,13 +179,18 @@ function HeadRow() {
 }
 
 const MyTaskListing = () => {
+  const location = useLocation();
   const dispatch = useDispatch();
+  const getStatusFromQuery = () => {
+    const params = new URLSearchParams(location.search);
+    return params.get("status") || "";
+  };
   const [filters, setFilters] = useState({
     title: "",
     created_by: "",
     from: "",
     to: "",
-    status: "",
+    status: getStatusFromQuery(),
     pagenumber: 1,
     perpage: 6,
     sort_by: "",
@@ -193,6 +199,15 @@ const MyTaskListing = () => {
   const [tasks, setTasks] = useState([]);
   const [taskFetching, setTaskFetching] = useState(false);
   const [selectedTasks, setSelectedTasks] = useState([]);
+
+  useEffect(() => {
+    const urlStatus = getStatusFromQuery();
+    setFilters((prev) => ({
+      ...prev,
+      status: urlStatus,
+      pagenumber: 1,
+    }));
+  }, [location.search]);
 
   const debouncedFilters = useDebounce(filters, 500);
   useEffect(() => {

@@ -12,6 +12,9 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import { Tooltip } from "../common/Tooltip";
+import { Button } from "@material-ui/core";
+import { deleteTask } from "../api/TaskApi";
+import Swal from "sweetalert2";
 
 import { LoaderRow } from "../common/Loading";
 import "../style/MyTaskListing.css";
@@ -134,7 +137,7 @@ function TaskFilterForm({ filters, handleInputChange }) {
   );
 }
 
-function TaskTableRow({ task }) {
+function TaskTableRow({ task, onDelete }) {
   return (
     <TableRow>
       <TableCell>{task.id}</TableCell>
@@ -146,6 +149,16 @@ function TaskTableRow({ task }) {
       <TableCell>{task.status}</TableCell>
       <TableCell>{task.created_at}</TableCell>
       <TableCell>{task.updated_at}</TableCell>
+      <TableCell>
+        <Button
+          size="small"
+          variant="contained"
+          color="secondary"
+          onClick={() => onDelete([task.id])}
+        >
+          Delete
+        </Button>
+      </TableCell>
     </TableRow>
   );
 }
@@ -172,6 +185,7 @@ function HeadRow() {
       <TableCell>Status</TableCell>
       <TableCell>Created At</TableCell>
       <TableCell>Updated At</TableCell>
+      <TableCell>Actions</TableCell>
     </TableRow>
   );
 }
@@ -217,6 +231,32 @@ const AllTaskListing = () => {
     }));
   };
 
+  const handleDelete = (taskId) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteTask(taskId)
+          .then(() => {
+            setTasks((prevTasks) =>
+              prevTasks.filter((task) => !taskId.includes(task.id))
+            );
+            Swal.fire("Deleted!", "Your task has been deleted.", "success");
+          })
+          .catch((error) => {
+            console.error("Failed to delete task:", error);
+            Swal.fire("Error!", "Failed to delete the task.", "error");
+          });
+      }
+    });
+  };
+
   return (
     <div>
       <h2 className="my-task-listing-title">All-Tasks-Listing</h2>
@@ -242,7 +282,11 @@ const AllTaskListing = () => {
             {!taskFetching &&
               tasks.length > 0 &&
               tasks.map((task) => (
-                <TaskTableRow task={task} key={`${task.id}`} />
+                <TaskTableRow
+                  task={task}
+                  key={`${task.id}`}
+                  onDelete={handleDelete}
+                />
               ))}
           </TableBody>
         </Table>

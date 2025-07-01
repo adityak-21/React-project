@@ -122,13 +122,14 @@ export function createTask(requestBody) {
   });
 }
 
-// export const deleteTasks = (taskIds) =>
-//   axios.post(
-//     `${BASE_URL}/bulkdeleteTasks`,
-//     { task_ids: taskIds },
-//     {
-//       headers: {
-//         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-//       },
-//     }
-//   );
+export function deleteTask(taskId) {
+  return axios.post(
+    `${BASE_URL}/deleteTask/${taskId}`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    }
+  );
+}
