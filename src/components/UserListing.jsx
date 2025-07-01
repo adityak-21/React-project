@@ -40,61 +40,73 @@ import { listRoles, assignUserRoles, removeUserRole } from "../api/RoleApi";
  * shift isAdmin to login time so only one time loading
  */
 
+const TABLE_COLUMNS = [
+  { label: "Id", key: "id" },
+  { label: "Name", key: "name", editable: true },
+  { label: "Email", key: "email" },
+  { label: "Role", key: "roles" },
+  { label: "Created By", key: "created_by" },
+  { label: "Created At", key: "created_at" },
+  { label: "Updated At", key: "updated_at" },
+];
+
+function FilterField({ tooltip, ...rest }) {
+  return (
+    <Tooltip text={tooltip}>
+      <input {...rest} />
+    </Tooltip>
+  );
+}
 function UserFilterForm({ filters, handleInputChange }) {
   return (
     <form className="user-listing-search-form" style={{ marginBottom: "1rem" }}>
-      <Tooltip text="Write name to search by name">
-        <input
-          type="text"
-          name="name"
-          placeholder="Search by Name"
-          value={filters.name}
-          onChange={handleInputChange}
-          className="search-name"
-        />
-      </Tooltip>
-      <Tooltip text="Write full email to search by email">
-        <input
-          type="text"
-          name="email"
-          placeholder="Search by Full Email"
-          value={filters.email}
-          onChange={handleInputChange}
-          className="search-email"
-        />
-      </Tooltip>
-      <Tooltip text="Write role to search by role">
-        <input
-          type="text"
-          name="role"
-          placeholder="Search by Role"
-          value={filters.role}
-          onChange={handleInputChange}
-          className="search-role"
-        />
-      </Tooltip>
-      <Tooltip text="Page number to display">
-        <input
-          type="number"
-          name="pagenumber"
-          min={1}
-          step={1}
-          value={filters.pagenumber}
-          onChange={handleInputChange}
-          className="page-number-input"
-        />
-      </Tooltip>
-      <Tooltip text="Number of users per page">
-        <input
-          type="number"
-          name="perpage"
-          min={1}
-          step={1}
-          value={filters.perpage}
-          onChange={handleInputChange}
-          className="per-page-input"
-        />
-      </Tooltip>
+      <FilterField
+        type="text"
+        name="name"
+        placeholder="Search by Name"
+        value={filters.name}
+        onChange={handleInputChange}
+        className="search-name"
+        tooltip="Write name to search by name"
+      />
+      <FilterField
+        type="text"
+        name="email"
+        placeholder="Search by Full Email"
+        value={filters.email}
+        onChange={handleInputChange}
+        className="search-email"
+        tooltip="Write full email to search by email"
+      />
+      <FilterField
+        type="text"
+        name="role"
+        placeholder="Search by Role"
+        value={filters.role}
+        onChange={handleInputChange}
+        className="search-role"
+        tooltip="Write role to search by role"
+      />
+      <FilterField
+        type="number"
+        name="pagenumber"
+        min={1}
+        step={1}
+        value={filters.pagenumber}
+        onChange={handleInputChange}
+        className="page-number-input"
+        tooltip="Page number to display"
+      />
+      <FilterField
+        type="number"
+        name="perpage"
+        min={1}
+        step={1}
+        value={filters.perpage}
+        onChange={handleInputChange}
+        className="per-page-input"
+        tooltip="Number of users per page"
+      />
     </form>
   );
 }
@@ -200,13 +212,9 @@ function HeadRow({ isAdmin, allChecked, onCheckAll }) {
           <Checkbox checked={allChecked} onChange={onCheckAll} />
         </TableCell>
       )}
-      <TableCell>Id</TableCell>
-      <TableCell>Name</TableCell>
-      <TableCell>Email</TableCell>
-      <TableCell>Role</TableCell>
-      <TableCell>Created By</TableCell>
-      <TableCell>Created At</TableCell>
-      <TableCell>Updated At</TableCell>
+      {TABLE_COLUMNS.map((col) => (
+        <TableCell key={col.key}>{col.label}</TableCell>
+      ))}
       {isAdmin && <TableCell>Action</TableCell>}
     </TableRow>
   );
@@ -221,21 +229,21 @@ function uniqueUsersById(users) {
   });
 }
 
+const DEFAULT_FILTERS = {
+  name: "",
+  email: "",
+  role: "",
+  pagenumber: 1,
+  perpage: 6,
+};
+
 const UserListing = () => {
   const dispatch = useDispatch();
   const { isAdmin, viewAsAdmin, verifying } = useSelector(
     (state) => state.admin
   );
-  const [filters, setFilters] = useState({
-    name: "",
-    email: "",
-    role: "",
-    pagenumber: 1,
-    perpage: 6,
-  });
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [users, setUsers] = useState([]);
-  //   const [isAdmin, setIsAdmin] = useState(false);
-  //   const [viewAsAdmin, setViewAsAdmin] = useState(false);
   const [userFetching, setUserFetching] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [editUser, setEditUser] = useState(null);
@@ -268,18 +276,6 @@ const UserListing = () => {
         console.error(err);
         setUserFetching(false);
       });
-
-    // verifyAdmin()
-    //   .then((res) => {
-    //     setIsAdmin(true);
-    //     setViewAsAdmin(true);
-    //   })
-    //   .catch((err) => {
-    //     setIsAdmin(false);
-    //     setViewAsAdmin(false);
-    //   });
-
-    // dispatch(verifyAdminStatus(verifyAdmin));
   }, [debouncedFilters]);
 
   const handleInputChange = (e) => {
@@ -332,7 +328,6 @@ const UserListing = () => {
   };
 
   const handleDownloadCSV = () => {
-    // Swal.fire("Not Implemented", "Download CSV with current filters", "info");
     const allFilters = { ...filters, pagenumber: 1, perpage: 10000 };
     listUsers(allFilters)
       .then((res) => {

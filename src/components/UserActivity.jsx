@@ -11,62 +11,72 @@ import Swal from "sweetalert2";
 import { listUserActivities } from "../api/UserApi";
 import { Tooltip } from "../common/Tooltip";
 import { LoaderRow } from "../common/Loading";
+import { useDebounce } from "../common/Debounce";
+
+const TABLE_COLUMNS = [
+  { label: "Id", key: "user_id" },
+  { label: "Name", key: "user_name" },
+  { label: "Login Time", key: "login_time" },
+  { label: "Logout Time", key: "logout_time" },
+  { label: "Duration", key: "duration" },
+];
+
+function FilterField({ tooltip, ...rest }) {
+  return (
+    <Tooltip text={tooltip}>
+      <input {...rest} />
+    </Tooltip>
+  );
+}
 
 function ActivityFilterForm({ filters, handleInputChange }) {
   return (
     <form className="user-listing-search-form" style={{ marginBottom: "1rem" }}>
-      <Tooltip text="Write name to search by name">
-        <input
-          type="text"
-          name="name"
-          placeholder="Search by Name"
-          value={filters.name}
-          onChange={handleInputChange}
-          className="search-name"
-        />
-      </Tooltip>
-      <Tooltip text="Activity from (login time)">
-        <input
-          type="datetime-local"
-          name="from"
-          //   placeholder="Search by Full Email"
-          value={filters.from}
-          onChange={handleInputChange}
-          className="search-date"
-        />
-      </Tooltip>
-      <Tooltip text="Activity to (logout time)">
-        <input
-          type="datetime-local"
-          name="to"
-          //   placeholder="Search by Role"
-          value={filters.to}
-          onChange={handleInputChange}
-          className="search-date"
-        />
-      </Tooltip>
-      <Tooltip text="Page number to display">
-        <input
-          type="number"
-          name="pagenumber"
-          min={1}
-          step={1}
-          value={filters.pagenumber}
-          onChange={handleInputChange}
-          className="page-number-input"
-        />
-      </Tooltip>
-      <Tooltip text="Number of users per page">
-        <input
-          type="number"
-          name="perpage"
-          min={1}
-          step={1}
-          value={filters.perpage}
-          onChange={handleInputChange}
-          className="per-page-input"
-        />
-      </Tooltip>
+      <FilterField
+        type="text"
+        name="name"
+        placeholder="Search by Name"
+        value={filters.name}
+        onChange={handleInputChange}
+        className="search-name"
+        tooltip="Write name to search by name"
+      />
+      <FilterField
+        type="datetime-local"
+        name="from"
+        value={filters.from}
+        onChange={handleInputChange}
+        className="search-date"
+        tooltip="Activity from (login time)"
+      />
+      <FilterField
+        type="datetime-local"
+        name="to"
+        value={filters.to}
+        onChange={handleInputChange}
+        className="search-date"
+        tooltip="Activity to (logout time)"
+      />
+      <FilterField
+        type="number"
+        name="pagenumber"
+        min={1}
+        step={1}
+        value={filters.pagenumber}
+        onChange={handleInputChange}
+        className="page-number-input"
+        tooltip="Page number to display"
+      />
+      <FilterField
+        type="number"
+        name="perpage"
+        min={1}
+        step={1}
+        value={filters.perpage}
+        onChange={handleInputChange}
+        className="per-page-input"
+        tooltip="Number of users per page"
+      />
     </form>
   );
 }
@@ -74,11 +84,9 @@ function ActivityFilterForm({ filters, handleInputChange }) {
 function ActivityTableRow({ activity }) {
   return (
     <TableRow>
-      <TableCell>{activity.user_id}</TableCell>
-      <TableCell>{activity.user_name}</TableCell>
-      <TableCell>{activity.login_time}</TableCell>
-      <TableCell>{activity.logout_time}</TableCell>
-      <TableCell>{activity.duration}</TableCell>
+      {TABLE_COLUMNS.map((col) => (
+        <TableCell key={col.key}>{activity[col.key]}</TableCell>
+      ))}
     </TableRow>
   );
 }
@@ -96,23 +104,23 @@ function NoUsersRow({ colSpan }) {
 function HeadRow() {
   return (
     <TableRow>
-      <TableCell>Id</TableCell>
-      <TableCell>Name</TableCell>
-      <TableCell>Login_time</TableCell>
-      <TableCell>Logout_time</TableCell>
-      <TableCell>Duration</TableCell>
+      {TABLE_COLUMNS.map((col) => (
+        <TableCell key={col.key}>{col.label}</TableCell>
+      ))}
     </TableRow>
   );
 }
 
+const DEFAULT_FILTERS = {
+  name: "",
+  from: "",
+  to: "",
+  pagenumber: 1,
+  perpage: 6,
+};
+
 const ListUserActivity = () => {
-  const [filters, setFilters] = React.useState({
-    name: "",
-    from: "",
-    to: "",
-    pagenumber: 1,
-    perpage: 6,
-  });
+  const [filters, setFilters] = React.useState(DEFAULT_FILTERS);
   const [activities, setActivities] = React.useState([]);
   const [activityFetching, setActivityFetching] = React.useState(false);
 
@@ -120,6 +128,9 @@ const ListUserActivity = () => {
   // first time render - componentDidMount
   // when props changes - componentDidUpdate
   // when the componets unmounts - componentWillUnmount
+
+  const debouncedFilters = useDebounce(filters, 500);
+
   React.useEffect(() => {
     setActivityFetching(true);
 
@@ -133,7 +144,7 @@ const ListUserActivity = () => {
         console.error(err);
         setActivityFetching(false);
       });
-  }, [filters]);
+  }, [debouncedFilters]);
 
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;

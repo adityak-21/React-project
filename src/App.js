@@ -35,33 +35,40 @@ import {
   setUserId,
   setUserRoles,
 } from "./redux/userReducer";
+import { Loader } from "./common/Loading";
 
 function AppContent() {
   const location = useLocation();
   const [id, setId] = useState(null);
+  const [isFetching, setIsFetching] = useState(true);
   const hideNavbar = ["/login", "/register"].includes(location.pathname);
 
   const [sidebar, setSidebar] = useState(false);
 
   const dispatch = useDispatch();
+
   useEffect(() => {
-    dispatch(verifyAdminStatus(verifyAdmin));
-  }, [dispatch]);
-  useEffect(() => {
-    me()
-      .then((response) => {
+    const fetchData = async () => {
+      try {
+        await dispatch(verifyAdminStatus(verifyAdmin));
+        const response = await me();
         dispatch(setUserName(response.data.name));
         dispatch(setUserEmail(response.data.email));
         dispatch(setUserId(response.data.id));
         dispatch(setUserRoles(response.data.roles));
         setId(response.data.id);
         console.log("User data fetched successfully:", response.data);
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error("Failed to fetch user data:", error);
-      });
-  }, [dispatch]);
-
+      } finally {
+        setIsFetching(false);
+      }
+    };
+    fetchData();
+  }, []);
+  if (isFetching) {
+    return <Loader />;
+  }
   return (
     <>
       {!hideNavbar && <Topbar />}

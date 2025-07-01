@@ -8,22 +8,7 @@ const PrivateRoute = ({ component: Component, ...rest }) => {
   const [isValid, setIsValid] = useState(null);
 
   useEffect(() => {
-    const verifyUser = async () => {
-      //   try {
-      //     const response = await verifyToken();
-      //     // response.data.valid===true ? console.log("Token is valid") : console.log("Token is invalid");
-      //     if (response.data.valid === true) {
-      //       // console.log("bbbb");
-      //       setIsValid(true);
-      //       // console.log(isValid);
-      //       // console.log("bbbb");
-      //     } else {
-      //       setIsValid(false);
-      //     }
-      //   } catch (error) {
-      //     console.error("Token verification failed:", error);
-      //     setIsValid(false);
-      //   }
+    const verifyUser = () => {
       verifyToken()
         .then((response) => {
           if (response.data.valid === true) {
@@ -42,7 +27,6 @@ const PrivateRoute = ({ component: Component, ...rest }) => {
     } else {
       setIsValid(false);
     }
-    // console.log(isValid);
   }, []);
 
   if (isValid === null) {

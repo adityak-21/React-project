@@ -1,7 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Loader } from "../common/Loading";
 import { useDebounce } from "../common/Debounce";
 import { listCreatedTasks, updateTaskTitle } from "../api/TaskApi";
 import Table from "@material-ui/core/Table";
@@ -24,110 +23,149 @@ import "../style/MyTaskListing.css";
 
 import { Modal } from "../common/Modal";
 
+const STATUS_OPTIONS = [
+  { value: "", label: "All Statuses" },
+  { value: "assigned", label: "Assigned" },
+  { value: "in_progress", label: "In Progress" },
+  { value: "completed", label: "Completed" },
+  { value: "verified", label: "Verified" },
+];
+
+const SORT_BY_OPTIONS = [
+  { value: "", label: "Default" },
+  { value: "title", label: "Title" },
+  { value: "due_date", label: "Due Date" },
+  { value: "status", label: "Status" },
+];
+
+const SORT_ORDER_OPTIONS = [
+  { value: "", label: "Default" },
+  { value: "asc", label: "Ascending" },
+  { value: "desc", label: "Descending" },
+];
+
+const TABLE_COLUMNS = [
+  { label: "Id", key: "id" },
+  { label: "Title", key: "title", editable: true },
+  { label: "Description", key: "description", editable: true },
+  { label: "Assignee", key: "assignee" },
+  { label: "Due Date", key: "due_date", editable: true },
+  { label: "Status", key: "status", editable: true },
+  { label: "Created At", key: "created_at" },
+  { label: "Updated At", key: "updated_at" },
+];
+
+function FilterField({ label, tooltip, ...rest }) {
+  return (
+    <Tooltip text={tooltip}>
+      {rest.type === "select" ? (
+        <select {...rest}>{rest.children}</select>
+      ) : (
+        <input {...rest} />
+      )}
+    </Tooltip>
+  );
+}
+
 function TaskFilterForm({ filters, handleInputChange }) {
   return (
     <form className="task-listing-search-form" style={{ marginBottom: "1rem" }}>
-      <Tooltip text="Write title to search by title">
-        <input
-          type="text"
-          name="title"
-          placeholder="Search by Title"
-          value={filters.title}
-          onChange={handleInputChange}
-          className="search-name"
-        />
-      </Tooltip>
-      <Tooltip text="Write assignee name">
-        <input
-          type="text"
-          name="assignee"
-          placeholder="Search by Assignee"
-          value={filters.assignee}
-          onChange={handleInputChange}
-          className="search-name"
-        />
-      </Tooltip>
-      <Tooltip text="Status of the task">
-        <select
-          name="status"
-          value={filters.status}
-          onChange={handleInputChange}
-          className="search-status"
-        >
-          <option value="">All Statuses</option>
-          <option value="assigned">Assigned</option>
-          <option value="in_progress">In Progress</option>
-          <option value="completed">Completed</option>
-          <option value="verified">Verified</option>
-        </select>
-      </Tooltip>
-      <Tooltip text="Due Date from">
-        <input
-          type="datetime-local"
-          name="from"
-          //   placeholder="Search by Full Email"
-          value={filters.from}
-          onChange={handleInputChange}
-          className="search-date"
-        />
-      </Tooltip>
-      <Tooltip text="Due Date to">
-        <input
-          type="datetime-local"
-          name="to"
-          //   placeholder="Search by Role"
-          value={filters.to}
-          onChange={handleInputChange}
-          className="search-date"
-        />
-      </Tooltip>
-      <Tooltip text="Page number to display">
-        <input
-          type="number"
-          name="pagenumber"
-          min={1}
-          step={1}
-          value={filters.pagenumber}
-          onChange={handleInputChange}
-          className="page-number-input"
-        />
-      </Tooltip>
-      <Tooltip text="Number of tasks per page">
-        <input
-          type="number"
-          name="perpage"
-          min={1}
-          step={1}
-          value={filters.perpage}
-          onChange={handleInputChange}
-          className="per-page-input"
-        />
-      </Tooltip>
-      <Tooltip text="Sort By">
-        <select
-          name="sort_by"
-          value={filters.sort_by || ""}
-          onChange={handleInputChange}
-          className="search-status"
-        >
-          <option value="">Default</option>
-          <option value="title">Title</option>
-          <option value="due_date">Due Date</option>
-          <option value="status">Status</option>
-        </select>
-      </Tooltip>
-      <Tooltip text="Sort Order">
-        <select
-          name="sort_order"
-          value={filters.sort_order || ""}
-          onChange={handleInputChange}
-          className="search-status"
-        >
-          <option value="">Default</option>
-          <option value="asc">Ascending</option>
-          <option value="desc">Descending</option>
-        </select>
-      </Tooltip>
+      <FilterField
+        type="text"
+        name="title"
+        placeholder="Search by Title"
+        value={filters.title}
+        onChange={handleInputChange}
+        className="search-name"
+        tooltip="Write title to search by title"
+      />
+      <FilterField
+        type="text"
+        name="assignee"
+        placeholder="Search by Assignee"
+        value={filters.assignee}
+        onChange={handleInputChange}
+        className="search-name"
+        tooltip="Write assignee name"
+      />
+      <FilterField
+        type="select"
+        name="status"
+        value={filters.status}
+        onChange={handleInputChange}
+        className="search-status"
+        tooltip="Status of the task"
+      >
+        {STATUS_OPTIONS.map((opt) => (
+          <option value={opt.value} key={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </FilterField>
+      <FilterField
+        type="datetime-local"
+        name="from"
+        value={filters.from}
+        onChange={handleInputChange}
+        className="search-date"
+        tooltip="Due Date from"
+      />
+      <FilterField
+        type="datetime-local"
+        name="to"
+        value={filters.to}
+        onChange={handleInputChange}
+        className="search-date"
+        tooltip="Due Date to"
+      />
+      <FilterField
+        type="number"
+        name="pagenumber"
+        min={1}
+        step={1}
+        value={filters.pagenumber}
+        onChange={handleInputChange}
+        className="page-number-input"
+        tooltip="Page number to display"
+      />
+      <FilterField
+        type="number"
+        name="perpage"
+        min={1}
+        step={1}
+        value={filters.perpage}
+        onChange={handleInputChange}
+        className="per-page-input"
+        tooltip="Number of tasks per page"
+      />
+      <FilterField
+        type="select"
+        name="sort_by"
+        value={filters.sort_by}
+        onChange={handleInputChange}
+        className="search-status"
+        tooltip="Sort By"
+      >
+        {SORT_BY_OPTIONS.map((opt) => (
+          <option value={opt.value} key={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </FilterField>
+      <FilterField
+        type="select"
+        name="sort_order"
+        value={filters.sort_order}
+        onChange={handleInputChange}
+        className="search-status"
+        tooltip="Sort Order"
+      >
+        {SORT_ORDER_OPTIONS.map((opt) => (
+          <option value={opt.value} key={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </FilterField>
     </form>
   );
 }
@@ -139,67 +177,38 @@ function TaskTableRow({
   handleTitleChange,
   handleDescriptionChange,
 }) {
-  const currStatus = task.status;
   return (
     <TableRow>
       <TableCell>{task.id}</TableCell>
-      {/* <TableCell>{task.title}</TableCell>
-      <TableCell>{task.description}</TableCell> */}
       <TableCell>
-        {task.title && (
-          <span
-            style={{
-              cursor: "pointer",
-              textDecoration: "underline",
-              color: "#1976d2",
-            }}
-            onClick={() => handleTitleChange(task)}
-            title="Click to edit title"
-          >
-            {task.title}
-          </span>
-        )}
-        {!task.title && (
-          <span
-            style={{
-              cursor: "pointer",
-              textDecoration: "underline",
-              color: "#999",
-            }}
-            onCliclk={() => handleTitleChange(task)}
-            title="Click to add title"
-          >
-            No Title
-          </span>
-        )}
+        <span
+          style={{
+            cursor: "pointer",
+            textDecoration: "underline",
+            color: task.title ? "#1976d2" : "#999",
+          }}
+          onClick={() => handleTitleChange(task)}
+          title={task.title ? "Click to edit title" : "Click to add title"}
+        >
+          {task.title || "No Title"}
+        </span>
       </TableCell>
       <TableCell>
-        {task.description && (
-          <span
-            style={{
-              cursor: "pointer",
-              textDecoration: "underline",
-              color: "#1976d2",
-            }}
-            onClick={() => handleDescriptionChange(task)}
-            title="Click to edit description"
-          >
-            {task.description}
-          </span>
-        )}
-        {!task.description && (
-          <span
-            style={{
-              cursor: "pointer",
-              textDecoration: "underline",
-              color: "#999",
-            }}
-            onClick={() => handleDescriptionChange(task)}
-            title="Click to add description"
-          >
-            No Description
-          </span>
-        )}
+        <span
+          style={{
+            cursor: "pointer",
+            textDecoration: "underline",
+            color: task.description ? "#1976d2" : "#999",
+          }}
+          onClick={() => handleDescriptionChange(task)}
+          title={
+            task.description
+              ? "Click to edit description"
+              : "Click to add description"
+          }
+        >
+          {task.description || "No Description"}
+        </span>
       </TableCell>
       <TableCell>{task.assignee}</TableCell>
       <TableCell>
@@ -211,16 +220,17 @@ function TaskTableRow({
         />
       </TableCell>
       <TableCell>
-        {task.status !== "verified" && (
+        {task.status !== "verified" ? (
           <select
             value={task.status}
             onChange={(e) => handleStatusChange(task.id, e.target.value)}
           >
-            <option value={currStatus}>{currStatus}</option>
+            <option value={task.status}>{task.status}</option>
             <option value="verified">Verified</option>
           </select>
+        ) : (
+          <span>Verified</span>
         )}
-        {task.status === "verified" && <span>Verified</span>}
       </TableCell>
       <TableCell>{task.created_at}</TableCell>
       <TableCell>{task.updated_at}</TableCell>
@@ -241,31 +251,35 @@ function NoTasksRow({ colSpan }) {
 function HeadRow() {
   return (
     <TableRow>
-      <TableCell>Id</TableCell>
-      <TableCell>Title</TableCell>
-      <TableCell>Description</TableCell>
-      <TableCell>Assignee</TableCell>
-      <TableCell>Due Date</TableCell>
-      <TableCell>Status</TableCell>
-      <TableCell>Created At</TableCell>
-      <TableCell>Updated At</TableCell>
+      {TABLE_COLUMNS.map((col) => (
+        <TableCell key={col.key}>{col.label}</TableCell>
+      ))}
     </TableRow>
   );
 }
 
+const DEFAULT_FILTERS = {
+  title: "",
+  assignee: "",
+  from: "",
+  to: "",
+  status: "",
+  pagenumber: 1,
+  perpage: 6,
+  sort_by: "",
+  sort_order: "",
+};
+
+const DEFAULT_NEWTASK = {
+  title: "",
+  description: "",
+  due_date: "",
+  assignee_id: "",
+};
+
 const CreatedTaskListing = () => {
   const dispatch = useDispatch();
-  const [filters, setFilters] = useState({
-    title: "",
-    assignee: "",
-    from: "",
-    to: "",
-    status: "",
-    pagenumber: 1,
-    perpage: 6,
-    sort_by: "",
-    sort_order: "",
-  });
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [tasks, setTasks] = useState([]);
   const [taskFetching, setTaskFetching] = useState(false);
   const [selectedTasks, setSelectedTasks] = useState([]);
@@ -275,12 +289,7 @@ const CreatedTaskListing = () => {
   const [editTaskTitle, setEditTaskTitle] = useState("");
   const [editTaskDescription, setEditTaskDescription] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [newTask, setNewTask] = useState({
-    title: "",
-    description: "",
-    due_date: "",
-    assignee_id: "",
-  });
+  const [newTask, setNewTask] = useState(DEFAULT_NEWTASK);
   const [assigneeSearch, setAssigneeSearch] = useState("");
   const [assigneeOptions, setAssigneeOptions] = useState([]);
   const [assigneeLoading, setAssigneeLoading] = useState(false);
@@ -419,12 +428,7 @@ const CreatedTaskListing = () => {
     createTask(newTask)
       .then(() => {
         setIsCreateModalOpen(false);
-        setNewTask({
-          title: "",
-          description: "",
-          due_date: "",
-          assignee_id: "",
-        });
+        setNewTask(DEFAULT_NEWTASK);
         setFilters({ ...filters });
       })
       .catch((err) => {
@@ -435,16 +439,6 @@ const CreatedTaskListing = () => {
   return (
     <div>
       <h2 className="my-task-listing-title">My-Created-Tasks-Listing</h2>
-      {/* <div style={{ marginBottom: "1rem" }}>
-        <Button
-          variant="outlined"
-          color="default"
-          onClick={handleDownloadCSV}
-          style={{ marginRight: "1rem" }}
-        >
-          Download CSV
-        </Button>
-      </div> */}
       <div style={{ marginBottom: "1rem" }}>
         <Button
           variant="outlined"
@@ -462,8 +456,10 @@ const CreatedTaskListing = () => {
             <HeadRow />
           </TableHead>
           <TableBody>
-            {taskFetching && <LoaderRow colSpan={9} />}
-            {!taskFetching && tasks.length === 0 && <NoTasksRow colSpan={9} />}
+            {taskFetching && <LoaderRow colSpan={TABLE_COLUMNS.length + 1} />}
+            {!taskFetching && tasks.length === 0 && (
+              <NoTasksRow colSpan={TABLE_COLUMNS.length + 1} />
+            )}
             {!taskFetching &&
               tasks.length > 0 &&
               tasks.map((task) => (
@@ -480,7 +476,6 @@ const CreatedTaskListing = () => {
         </Table>
       </TableContainer>
       <Modal open={isTitleModalOpen} onClose={() => setIsTitleModalOpen(false)}>
-        {/* //Modal Header, Body and Footer// */}
         <h3>Edit Title</h3>
         <input
           type="text"

@@ -1,35 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { Route, Redirect } from "react-router-dom";
-import { verifyAdmin } from "../api/AuthApi";
 import { Loader } from "../common/Loading";
+import { useSelector } from "react-redux";
 
 const AdminRoute = ({ component: Component, ...rest }) => {
   const token = localStorage.getItem("access_token");
   const [isValid, setIsValid] = useState(null);
+  const isAdm = useSelector((state) => state.admin.isAdmin);
 
   useEffect(() => {
-    const verify = () => {
-      verifyAdmin()
-        .then((response) => {
-          setIsValid(true);
-        })
-        .catch((error) => {
-          console.error("Token verification failed:", error);
-          setIsValid(false);
-        });
-    };
     if (token) {
-      verify();
+      setIsValid(!!isAdm);
     } else {
       setIsValid(false);
     }
-    // console.log(isValid);
-  }, []);
+  }, [token, isAdm]);
 
   if (isValid === null) {
     return <Loader />;
   }
-
   return (
     <Route
       {...rest}
@@ -37,7 +26,7 @@ const AdminRoute = ({ component: Component, ...rest }) => {
         isValid === true ? (
           <Component {...props} />
         ) : (
-          (console.log(isValid), (<Redirect to="/login" />))
+          (console.log(isAdm), (<Redirect to="/login" />))
         )
       }
     />

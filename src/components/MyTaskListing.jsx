@@ -1,7 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Loader } from "../common/Loading";
 import { useDebounce } from "../common/Debounce";
 import { listMyTasks } from "../api/TaskApi";
 import Table from "@material-ui/core/Table";
@@ -18,110 +17,149 @@ import { useLocation } from "react-router-dom";
 import { LoaderRow } from "../common/Loading";
 import "../style/MyTaskListing.css";
 
+const STATUS_OPTIONS = [
+  { value: "", label: "All Statuses" },
+  { value: "assigned", label: "Assigned" },
+  { value: "in_progress", label: "In Progress" },
+  { value: "completed", label: "Completed" },
+  { value: "verified", label: "Verified" },
+];
+
+const SORT_BY_OPTIONS = [
+  { value: "", label: "Default" },
+  { value: "title", label: "Title" },
+  { value: "due_date", label: "Due Date" },
+  { value: "status", label: "Status" },
+];
+
+const SORT_ORDER_OPTIONS = [
+  { value: "", label: "Default" },
+  { value: "asc", label: "Ascending" },
+  { value: "desc", label: "Descending" },
+];
+
+const TABLE_COLUMNS = [
+  { label: "Id", key: "id" },
+  { label: "Title", key: "title" },
+  { label: "Description", key: "description" },
+  { label: "Created By", key: "created_by" },
+  { label: "Due Date", key: "due_date" },
+  { label: "Status", key: "status", editable: true },
+  { label: "Created At", key: "created_at" },
+  { label: "Updated At", key: "updated_at" },
+];
+
+function FilterField({ tooltip, ...rest }) {
+  return (
+    <Tooltip text={tooltip}>
+      {rest.type === "select" ? (
+        <select {...rest}>{rest.children}</select>
+      ) : (
+        <input {...rest} />
+      )}
+    </Tooltip>
+  );
+}
+
 function TaskFilterForm({ filters, handleInputChange }) {
   return (
     <form className="task-listing-search-form" style={{ marginBottom: "1rem" }}>
-      <Tooltip text="Write title to search by title">
-        <input
-          type="text"
-          name="title"
-          placeholder="Search by Title"
-          value={filters.title}
-          onChange={handleInputChange}
-          className="search-name"
-        />
-      </Tooltip>
-      <Tooltip text="Write creator name">
-        <input
-          type="text"
-          name="created_by"
-          placeholder="Search by Creator"
-          value={filters.created_by}
-          onChange={handleInputChange}
-          className="search-name"
-        />
-      </Tooltip>
-      <Tooltip text="Status of the task">
-        <select
-          name="status"
-          value={filters.status}
-          onChange={handleInputChange}
-          className="search-status"
-        >
-          <option value="">All Statuses</option>
-          <option value="assigned">Assigned</option>
-          <option value="in_progress">In Progress</option>
-          <option value="completed">Completed</option>
-          <option value="verified">Verified</option>
-        </select>
-      </Tooltip>
-      <Tooltip text="Due Date from">
-        <input
-          type="datetime-local"
-          name="from"
-          //   placeholder="Search by Full Email"
-          value={filters.from}
-          onChange={handleInputChange}
-          className="search-date"
-        />
-      </Tooltip>
-      <Tooltip text="Due Date to">
-        <input
-          type="datetime-local"
-          name="to"
-          //   placeholder="Search by Role"
-          value={filters.to}
-          onChange={handleInputChange}
-          className="search-date"
-        />
-      </Tooltip>
-      <Tooltip text="Page number to display">
-        <input
-          type="number"
-          name="pagenumber"
-          min={1}
-          step={1}
-          value={filters.pagenumber}
-          onChange={handleInputChange}
-          className="page-number-input"
-        />
-      </Tooltip>
-      <Tooltip text="Number of tasks per page">
-        <input
-          type="number"
-          name="perpage"
-          min={1}
-          step={1}
-          value={filters.perpage}
-          onChange={handleInputChange}
-          className="per-page-input"
-        />
-      </Tooltip>
-      <Tooltip text="Sort By">
-        <select
-          name="sort_by"
-          value={filters.sort_by || ""}
-          onChange={handleInputChange}
-          className="search-status"
-        >
-          <option value="">Default</option>
-          <option value="title">Title</option>
-          <option value="due_date">Due Date</option>
-          <option value="status">Status</option>
-        </select>
-      </Tooltip>
-      <Tooltip text="Sort Order">
-        <select
-          name="sort_order"
-          value={filters.sort_order || ""}
-          onChange={handleInputChange}
-          className="search-status"
-        >
-          <option value="">Default</option>
-          <option value="asc">Ascending</option>
-          <option value="desc">Descending</option>
-        </select>
-      </Tooltip>
+      <FilterField
+        type="text"
+        name="title"
+        placeholder="Search by Title"
+        value={filters.title}
+        onChange={handleInputChange}
+        className="search-name"
+        tooltip="Write title to search by title"
+      />
+      <FilterField
+        type="text"
+        name="created_by"
+        placeholder="Search by Creator"
+        value={filters.created_by}
+        onChange={handleInputChange}
+        className="search-name"
+        tooltip="Write creator name"
+      />
+      <FilterField
+        type="select"
+        name="status"
+        value={filters.status}
+        onChange={handleInputChange}
+        className="search-status"
+        tooltip="Status of the task"
+      >
+        {STATUS_OPTIONS.map((opt) => (
+          <option value={opt.value} key={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </FilterField>
+      <FilterField
+        type="datetime-local"
+        name="from"
+        value={filters.from}
+        onChange={handleInputChange}
+        className="search-date"
+        tooltip="Due Date from"
+      />
+      <FilterField
+        type="datetime-local"
+        name="to"
+        value={filters.to}
+        onChange={handleInputChange}
+        className="search-date"
+        tooltip="Due Date to"
+      />
+      <FilterField
+        type="number"
+        name="pagenumber"
+        min={1}
+        step={1}
+        value={filters.pagenumber}
+        onChange={handleInputChange}
+        className="page-number-input"
+        tooltip="Page number to display"
+      />
+      <FilterField
+        type="number"
+        name="perpage"
+        min={1}
+        step={1}
+        value={filters.perpage}
+        onChange={handleInputChange}
+        className="per-page-input"
+        tooltip="Number of tasks per page"
+      />
+      <FilterField
+        type="select"
+        name="sort_by"
+        value={filters.sort_by}
+        onChange={handleInputChange}
+        className="search-status"
+        tooltip="Sort By"
+      >
+        {SORT_BY_OPTIONS.map((opt) => (
+          <option value={opt.value} key={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </FilterField>
+      <FilterField
+        type="select"
+        name="sort_order"
+        value={filters.sort_order}
+        onChange={handleInputChange}
+        className="search-status"
+        tooltip="Sort Order"
+      >
+        {SORT_ORDER_OPTIONS.map((opt) => (
+          <option value={opt.value} key={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </FilterField>
     </form>
   );
 }
@@ -129,26 +167,26 @@ function TaskFilterForm({ filters, handleInputChange }) {
 function TaskTableRow({ task, handleStatusChange }) {
   return (
     <TableRow>
-      <TableCell>{task.id}</TableCell>
-      <TableCell>{task.title}</TableCell>
-      <TableCell>{task.description}</TableCell>
-      <TableCell>{task.created_by}</TableCell>
-      <TableCell>{task.due_date}</TableCell>
-      <TableCell>
-        {task.status !== "verified" && (
-          <select
-            value={task.status}
-            onChange={(e) => handleStatusChange(task.id, e.target.value)}
-          >
-            <option value="assigned">Assigned</option>
-            <option value="in_progress">In Progress</option>
-            <option value="completed">Completed</option>
-          </select>
-        )}
-        {task.status === "verified" && <span>Verified</span>}
-      </TableCell>
-      <TableCell>{task.created_at}</TableCell>
-      <TableCell>{task.updated_at}</TableCell>
+      {TABLE_COLUMNS.map((col) =>
+        col.key === "status" ? (
+          <TableCell key={col.key}>
+            {task.status !== "verified" ? (
+              <select
+                value={task.status}
+                onChange={(e) => handleStatusChange(task.id, e.target.value)}
+              >
+                <option value="assigned">Assigned</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+              </select>
+            ) : (
+              <span>Verified</span>
+            )}
+          </TableCell>
+        ) : (
+          <TableCell key={col.key}>{task[col.key]}</TableCell>
+        )
+      )}
     </TableRow>
   );
 }
@@ -166,17 +204,24 @@ function NoTasksRow({ colSpan }) {
 function HeadRow() {
   return (
     <TableRow>
-      <TableCell>Id</TableCell>
-      <TableCell>Title</TableCell>
-      <TableCell>Description</TableCell>
-      <TableCell>Created By</TableCell>
-      <TableCell>Due Date</TableCell>
-      <TableCell>Status</TableCell>
-      <TableCell>Created At</TableCell>
-      <TableCell>Updated At</TableCell>
+      {TABLE_COLUMNS.map((col) => (
+        <TableCell key={col.key}>{col.label}</TableCell>
+      ))}
     </TableRow>
   );
 }
+
+const DEFAULT_FILTERS = {
+  title: "",
+  created_by: "",
+  from: "",
+  to: "",
+  status: "",
+  pagenumber: 1,
+  perpage: 6,
+  sort_by: "",
+  sort_order: "",
+};
 
 const MyTaskListing = () => {
   const location = useLocation();
@@ -185,17 +230,7 @@ const MyTaskListing = () => {
     const params = new URLSearchParams(location.search);
     return params.get("status") || "";
   };
-  const [filters, setFilters] = useState({
-    title: "",
-    created_by: "",
-    from: "",
-    to: "",
-    status: getStatusFromQuery(),
-    pagenumber: 1,
-    perpage: 6,
-    sort_by: "",
-    sort_order: "",
-  });
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [tasks, setTasks] = useState([]);
   const [taskFetching, setTaskFetching] = useState(false);
   const [selectedTasks, setSelectedTasks] = useState([]);
@@ -250,16 +285,6 @@ const MyTaskListing = () => {
   return (
     <div>
       <h2 className="my-task-listing-title">My-Tasks-Listing</h2>
-      {/* <div style={{ marginBottom: "1rem" }}>
-        <Button
-          variant="outlined"
-          color="default"
-          onClick={handleDownloadCSV}
-          style={{ marginRight: "1rem" }}
-        >
-          Download CSV
-        </Button>
-      </div> */}
       <TaskFilterForm filters={filters} handleInputChange={handleInputChange} />
       <TableContainer component={Paper}>
         <Table>

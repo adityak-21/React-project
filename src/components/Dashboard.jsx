@@ -12,6 +12,25 @@ import HighchartsReact from "highcharts-react-official";
 import "../style/Dashboard.css";
 import { useSelector } from "react-redux";
 
+const SUMMARY_CONFIG = [
+  { key: "assigned", label: "Assigned", color: "#2d6cdf", clickable: true },
+  {
+    key: "in_progress",
+    label: "In Progress",
+    color: "#f0ad4e",
+    clickable: true,
+  },
+  { key: "completed", label: "Completed", color: "#5cb85c", clickable: true },
+  { key: "verified", label: "Verified", color: "#17a2b8", clickable: true },
+  { key: "overdue", label: "Overdue", color: "#ff4a4a", clickable: false },
+  {
+    key: "due_today",
+    label: "Deadline Today",
+    color: "#9b59b6",
+    clickable: false,
+  },
+];
+
 const Dashboard = () => {
   const [myTasks, setMyTasks] = useState([]);
   const [avgCompletion, setAvgCompletion] = useState({});
@@ -77,6 +96,7 @@ const Dashboard = () => {
       series: [{ name: "Tasks", colorByPoint: true, data: pieData }],
     };
   }, [myTasks]);
+
   const roleNames = userRoles.map((role) => role.role);
 
   const avgCompletionOptions = useMemo(() => {
@@ -148,36 +168,15 @@ const Dashboard = () => {
       </div>
 
       <div className="task-summary-slab">
-        <SummaryCard
-          color="#2d6cdf"
-          label="Assigned"
-          value={myTasks.assigned}
-          onClick={() => handleSummaryCardClick("assigned")}
-        />
-        <SummaryCard
-          color="#f0ad4e"
-          label="In Progress"
-          value={myTasks.in_progress}
-          onClick={() => handleSummaryCardClick("in_progress")}
-        />
-        <SummaryCard
-          color="#5cb85c"
-          label="Completed"
-          value={myTasks.completed}
-          onClick={() => handleSummaryCardClick("completed")}
-        />
-        <SummaryCard
-          color="#17a2b8"
-          label="Verified"
-          value={myTasks.verified}
-          onClick={() => handleSummaryCardClick("verified")}
-        />
-        <SummaryCard color="#ff4a4a" label="Overdue" value={myTasks.overdue} />
-        <SummaryCard
-          color="#9b59b6"
-          label="Deadline Today"
-          value={myTasks.due_today}
-        />
+        {SUMMARY_CONFIG.map(({ key, label, color, clickable }) => (
+          <SummaryCard
+            key={key}
+            color={color}
+            label={label}
+            value={myTasks[key]}
+            onClick={clickable ? () => handleSummaryCardClick(key) : undefined}
+          />
+        ))}
       </div>
 
       <div className="dashboard-charts">
