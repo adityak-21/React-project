@@ -1,0 +1,47 @@
+.user-listing-title {
+  text-align: center;
+  color: #23395d;
+  margin-top: 40px;
+  margin-bottom: 40px;
+  font-weight: 600;
+}
+.search-name {
+  margin-right: 50px;
+  margin-left: 50px;
+}
+.seach-email {
+  margin-right: 50px;
+}
+.search-role {
+  margin-left: 50px;
+  margin-right: 50px;
+}
+.page-number-input {
+  margin-right: 50px;
+  width: 40px;
+}
+.per-page-input {
+  margin-right: 50px;
+  width: 40px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(30, 45, 80, 0.18);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px 24px 18px 24px;
+  box-shadow: 0 6px 30px rgba(40, 60, 110, 0.17);
+  min-width: 320px;
+  max-width: 92vw;
+}
