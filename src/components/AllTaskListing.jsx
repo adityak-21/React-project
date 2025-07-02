@@ -16,7 +16,7 @@ import { deleteTask } from "../api/TaskApi";
 import Swal from "sweetalert2";
 
 import { LoaderRow } from "../common/Loading";
-import "../style/MyTaskListing.css";
+import "../style/TaskListing.css";
 
 const STATUS_OPTIONS = [
   { value: "", label: "All Statuses" },

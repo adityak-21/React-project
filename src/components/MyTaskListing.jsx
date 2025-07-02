@@ -15,7 +15,7 @@ import { updateTaskStatus } from "../api/TaskApi";
 import { useLocation } from "react-router-dom";
 
 import { LoaderRow } from "../common/Loading";
-import "../style/MyTaskListing.css";
+import "../style/TaskListing.css";
 
 const STATUS_OPTIONS = [
   { value: "", label: "All Statuses" },

@@ -27,6 +27,7 @@ import EditIcon from "@material-ui/icons/Edit";
 import IconButton from "@material-ui/core/IconButton";
 import { updateUserName } from "../api/UserApi";
 import { listRoles, assignUserRoles, removeUserRole } from "../api/RoleApi";
+import CloseIcon from "@material-ui/icons/Close";
 
 /**
  * debounce                                             done
@@ -156,7 +157,7 @@ function UserTableRow({
                   style={{ marginLeft: 2 }}
                   aria-label="Remove Role"
                 >
-                  ✕
+                  <CloseIcon fontSize="small" />
                 </IconButton>
               )}
             </span>
@@ -439,7 +440,7 @@ const UserListing = () => {
     <div>
       <h2 className="user-listing-title">User-Listing</h2>
       {viewAsAdmin && (
-        <div style={{ marginBottom: "1rem" }}>
+        <div className="admin-toggle-topright">
           <Button
             variant={isAdmin ? "contained" : "outlined"}
             color="primary"
@@ -457,39 +458,41 @@ const UserListing = () => {
           </Button>
         </div>
       )}
-      {isAdmin && (
-        <div style={{ marginBottom: "1rem" }}>
-          <RegisterModal
-            trigger={({ onClick }) => (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={onClick}
-                style={{ marginRight: "1rem" }}
-              >
-                Create User
-              </Button>
-            )}
-          />
+      <div className="action-bar">
+        {isAdmin && (
+          <div>
+            <RegisterModal
+              trigger={({ onClick }) => (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={onClick}
+                  style={{ marginRight: "1rem" }}
+                >
+                  Create User
+                </Button>
+              )}
+            />
+            <Button
+              variant="contained"
+              color="secondary"
+              disabled={selectedUsers.length === 0}
+              onClick={() => handleDelete(selectedUsers)}
+            >
+              Delete Selected
+            </Button>
+          </div>
+        )}
+        <div className="csv-download-container">
           <Button
-            variant="contained"
-            color="secondary"
-            disabled={selectedUsers.length === 0}
-            onClick={() => handleDelete(selectedUsers)}
+            variant="outlined"
+            color="default"
+            onClick={handleDownloadCSV}
+            style={{ marginRight: "1rem" }}
           >
-            Delete Selected
+            Download CSV
           </Button>
         </div>
-      )}
-      <div style={{ marginBottom: "1rem" }}>
-        <Button
-          variant="outlined"
-          color="default"
-          onClick={handleDownloadCSV}
-          style={{ marginRight: "1rem" }}
-        >
-          Download CSV
-        </Button>
       </div>
       <UserFilterForm filters={filters} handleInputChange={handleInputChange} />
       <TableContainer component={Paper}>

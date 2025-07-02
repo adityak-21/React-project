@@ -19,7 +19,7 @@ import { listUsers } from "../api/UserApi";
 import { createTask } from "../api/TaskApi";
 
 import { LoaderRow } from "../common/Loading";
-import "../style/MyTaskListing.css";
+import "../style/TaskListing.css";
 
 import { Modal } from "../common/Modal";
 
@@ -439,12 +439,11 @@ const CreatedTaskListing = () => {
   return (
     <div>
       <h2 className="my-task-listing-title">My-Created-Tasks-Listing</h2>
-      <div style={{ marginBottom: "1rem" }}>
+      <div className="create-task-btn-container">
         <Button
           variant="outlined"
           color="default"
           onClick={() => setIsCreateModalOpen(true)}
-          style={{ marginRight: "1rem" }}
         >
           Create Task
         </Button>
@@ -476,155 +475,161 @@ const CreatedTaskListing = () => {
         </Table>
       </TableContainer>
       <Modal open={isTitleModalOpen} onClose={() => setIsTitleModalOpen(false)}>
-        <h3>Edit Title</h3>
-        <input
-          type="text"
-          name="title"
-          value={editTaskTitle}
-          onChange={(e) => setEditTaskTitle(e.target.value)}
-          style={{ width: "100%" }}
-        />
-        <div style={{ marginTop: "1rem" }}>
-          <button onClick={handleTitleSave}>Save</button>
-          <button
-            onClick={() => setIsTitleModalOpen(false)}
-            style={{ marginLeft: "1rem" }}
-          >
-            Cancel
-          </button>
+        <div className="common-modal">
+          <h3>Edit Title</h3>
+          <input
+            type="text"
+            name="title"
+            value={editTaskTitle}
+            onChange={(e) => setEditTaskTitle(e.target.value)}
+            style={{ width: "100%" }}
+          />
+          <div style={{ marginTop: "1rem" }}>
+            <button onClick={handleTitleSave}>Save</button>
+            <button
+              onClick={() => setIsTitleModalOpen(false)}
+              style={{ marginLeft: "1rem" }}
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </Modal>
       <Modal
         open={isDescriptionModalOpen}
         onClose={() => setIsDescriptionModalOpen(false)}
       >
-        <h3>Edit Description</h3>
-        <textarea
-          name="description"
-          value={editTaskDescription}
-          onChange={(e) => setEditTaskDescription(e.target.value)}
-          rows={4}
-          style={{ width: "100%" }}
-        />
-        <div style={{ marginTop: "1rem" }}>
-          <button onClick={handleDescriptionSave}>Save</button>
-          <button
-            onClick={() => setIsDescriptionModalOpen(false)}
-            style={{ marginLeft: "1rem" }}
-          >
-            Cancel
-          </button>
+        <div className="common-modal">
+          <h3>Edit Description</h3>
+          <textarea
+            name="description"
+            value={editTaskDescription}
+            onChange={(e) => setEditTaskDescription(e.target.value)}
+            rows={4}
+            style={{ width: "100%" }}
+          />
+          <div style={{ marginTop: "1rem" }}>
+            <button onClick={handleDescriptionSave}>Save</button>
+            <button
+              onClick={() => setIsDescriptionModalOpen(false)}
+              style={{ marginLeft: "1rem" }}
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </Modal>
       <Modal
         open={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
       >
-        <h3>Create New Task</h3>
-        <form>
-          <div>
-            <label>
-              Title <span style={{ color: "red" }}>*</span>
-              <input
-                type="text"
-                name="title"
-                value={newTask.title}
-                onChange={handleNewTaskChange}
-                required
-                maxLength={255}
-                style={{ width: "100%" }}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Description
-              <textarea
-                name="description"
-                value={newTask.description}
-                onChange={handleNewTaskChange}
-                rows={3}
-                style={{ width: "100%" }}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Due Date
-              <input
-                type="datetime-local"
-                name="due_date"
-                value={newTask.due_date}
-                onChange={handleNewTaskChange}
-                style={{ width: "100%", marginBottom: "0.7rem" }}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Assignee <span style={{ color: "red" }}>*</span>
-              <input
-                type="text"
-                placeholder="Search user..."
-                value={assigneeSearch}
-                onChange={handleAssigneeSearch}
-                required
-                style={{ width: "100%" }}
-              />
-              <div
-                style={{
-                  maxHeight: 120,
-                  overflowY: "auto",
-                  border: "1px solid #ddd",
-                  marginTop: 2,
-                }}
-              >
-                {assigneeLoading ? (
-                  <div>Loading...</div>
-                ) : (
-                  assigneeOptions.map((u, idx) => (
-                    <div
-                      key={`${u.id}-${idx}`}
-                      style={{
-                        padding: 4,
-                        background:
-                          newTask.assignee_id === u.id ? "#e0e0e0" : "#fff",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => handleSelectAssignee(u.id)}
-                    >
-                      {u.name} ({u.email})
-                    </div>
-                  ))
-                )}
-                {assigneeOptions.length === 0 && !assigneeLoading && (
-                  <div>No users found</div>
-                )}
-              </div>
-              {newTask.assignee_id && (
-                <div style={{ fontSize: 12, color: "#388e3c", marginTop: 2 }}>
-                  Selected:{" "}
-                  {
-                    assigneeOptions.find((u) => u.id === newTask.assignee_id)
-                      ?.name
-                  }
+        <div className="common-modal">
+          <h3>Create New Task</h3>
+          <form>
+            <div>
+              <label>
+                Title <span style={{ color: "red" }}>*</span>
+                <input
+                  type="text"
+                  name="title"
+                  value={newTask.title}
+                  onChange={handleNewTaskChange}
+                  required
+                  maxLength={255}
+                  style={{ width: "100%" }}
+                />
+              </label>
+            </div>
+            <div>
+              <label>
+                Description
+                <textarea
+                  name="description"
+                  value={newTask.description}
+                  onChange={handleNewTaskChange}
+                  rows={3}
+                  style={{ width: "100%" }}
+                />
+              </label>
+            </div>
+            <div>
+              <label>
+                Due Date
+                <input
+                  type="datetime-local"
+                  name="due_date"
+                  value={newTask.due_date}
+                  onChange={handleNewTaskChange}
+                  style={{ width: "100%", marginBottom: "0.7rem" }}
+                />
+              </label>
+            </div>
+            <div>
+              <label>
+                Assignee <span style={{ color: "red" }}>*</span>
+                <input
+                  type="text"
+                  placeholder="Search user..."
+                  value={assigneeSearch}
+                  onChange={handleAssigneeSearch}
+                  required
+                  style={{ width: "100%" }}
+                />
+                <div
+                  style={{
+                    maxHeight: 120,
+                    overflowY: "auto",
+                    border: "1px solid #ddd",
+                    marginTop: 2,
+                  }}
+                >
+                  {assigneeLoading ? (
+                    <div>Loading...</div>
+                  ) : (
+                    assigneeOptions.map((u, idx) => (
+                      <div
+                        key={`${u.id}-${idx}`}
+                        style={{
+                          padding: 4,
+                          background:
+                            newTask.assignee_id === u.id ? "#e0e0e0" : "#fff",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => handleSelectAssignee(u.id)}
+                      >
+                        {u.name} ({u.email})
+                      </div>
+                    ))
+                  )}
+                  {assigneeOptions.length === 0 && !assigneeLoading && (
+                    <div>No users found</div>
+                  )}
                 </div>
-              )}
-            </label>
-          </div>
-          <div style={{ marginTop: "1rem" }}>
-            <button type="button" onClick={handleCreateTaskSave}>
-              Create
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsCreateModalOpen(false)}
-              style={{ marginLeft: 8 }}
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+                {newTask.assignee_id && (
+                  <div style={{ fontSize: 12, color: "#388e3c", marginTop: 2 }}>
+                    Selected:{" "}
+                    {
+                      assigneeOptions.find((u) => u.id === newTask.assignee_id)
+                        ?.name
+                    }
+                  </div>
+                )}
+              </label>
+            </div>
+            <div style={{ marginTop: "1rem" }}>
+              <button type="button" onClick={handleCreateTaskSave}>
+                Create
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsCreateModalOpen(false)}
+                style={{ marginLeft: 8 }}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
       </Modal>
     </div>
   );
