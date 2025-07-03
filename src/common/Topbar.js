@@ -78,7 +78,10 @@ const Topbar = () => {
       >
         <AiOutlineBell size={28} />
         {notifications.length > 0 && (
-          <span className="badge">{notifications.length}</span>
+          <span className="badge">
+            {" "}
+            {notifications.reduce((acc, n) => acc + (!n.is_read ? 1 : 0), 0)}
+          </span>
         )}
         {notifHovered && (
           <div

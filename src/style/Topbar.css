@@ -1,4 +1,4 @@
-.topbar-content {
+/* .topbar-content {
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -45,4 +45,135 @@
   z-index: 9999;
   white-space: normal;
   font-size: 0.95rem;
+} */
+
+.topbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2.4rem;
+  background: #eff0f1;
+  padding: 0.5rem 2.2rem 0.5rem 1.2rem;
+  min-height: 56px;
+  box-shadow: 0 2px 8px #e3e9f033;
+  top: 0;
+  z-index: 1201;
+}
+
+.icon-wrapper {
+  position: relative;
+  margin-right: 0.3rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.17s;
+  border-radius: 50%;
+  padding: 5px;
+}
+.icon-wrapper:hover {
+  background: #edf2fc;
+}
+
+.badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: #ff4b48;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 9px;
+  padding: 1px 7px;
+  min-width: 20px;
+  text-align: center;
+  box-shadow: 0 1px 6px #e3e9f0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.tooltipnew {
+  position: absolute;
+  right: 0;
+  top: 135%;
+  min-width: 270px;
+  max-width: 390px;
+  max-height: 350px; /* Limit height for scrollability */
+  background: #fff;
+  color: #222;
+  box-shadow: 0 2px 12px #e3e9f0;
+  border-radius: 10px;
+  padding: 0.9rem 1.1rem 0.9rem 1.1rem;
+  z-index: 1203;
+  font-size: 0.99rem;
+  line-height: 1.5;
+  white-space: normal;
+  word-break: break-word;
+  overflow-y: auto; /* Makes content scrollable */
+  display: flex;
+  flex-direction: column;
+}
+
+.tooltipnew ul {
+  margin: 0.3em 0 0 0;
+  padding: 0 0 0 0.6em;
+  list-style: none;
+  max-height: 290px; /* Ensures scrolling */
+  overflow-y: auto;
+}
+
+.tooltipnew li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin-bottom: 0.7em;
+  padding-bottom: 0.5em;
+  border-bottom: 1px solid #f0f3fa;
+  font-size: 0.98em;
+  word-break: break-word;
+}
+
+.tooltipnew li:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+.notif-title {
+  font-weight: 600;
+  color: #253874;
+  font-size: 1em;
+  margin-bottom: 0.1em;
+  white-space: pre-line;
+  overflow-wrap: break-word;
+}
+
+.notif-message {
+  font-size: 0.97em;
+  color: #3a3a3a;
+  word-break: break-word;
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.tooltipnew input[type="checkbox"] {
+  accent-color: #1a237e;
+  margin-right: 7px;
+  width: 1.08em;
+  height: 1.08em;
+}
+
+@media (max-width: 700px) {
+  .tooltipnew {
+    min-width: 140px;
+    max-width: 95vw;
+    font-size: 0.92rem;
+    padding: 0.6rem 0.5rem;
+    top: 110%;
+    right: 0;
+    left: unset;
+    max-height: 220px;
+  }
+  .tooltipnew ul {
+    max-height: 155px;
+  }
 }

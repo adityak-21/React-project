@@ -86,7 +86,7 @@ function AppContent() {
           <Route path="/login" component={LoginForm} />
           <Route path="/register" component={RegisterForm} />
           <PrivateRoute path="/userListing" component={UserListing} />
-          <PrivateRoute path="/userActivity" component={UserActivity} />
+          <AdminRoute path="/userActivity" component={UserActivity} />
           <PrivateRoute path="/myTasks" component={MyTaskListing} />
           <PrivateRoute path="/createdTasks" component={CreatedTaskListing} />
           <PrivateRoute path="/dashboard" component={Dashboard} />

@@ -160,6 +160,7 @@ function UserTableRow({
                   <CloseIcon fontSize="small" />
                 </IconButton>
               )}
+              <br />
             </span>
           ))
         ) : (
@@ -172,7 +173,7 @@ function UserTableRow({
             style={{ marginLeft: 8 }}
             onClick={() => onEditRoles(user)}
           >
-            Edit Roles
+            Add Roles
           </Button>
         )}
       </TableCell>
@@ -397,6 +398,17 @@ const UserListing = () => {
 
   const handleSaveRoles = () => {
     setSavingRoles(true);
+    const existingRoleIds = (editRolesUser.roles || []).map((r) => r.id);
+    const rolesToAdd = selectedRoles.filter(
+      (id) => !existingRoleIds.includes(id)
+    );
+    if (rolesToAdd.length === 0) {
+      closeEditRoles();
+      Swal.fire("Info", "No new roles to add.", "info");
+      setSavingRoles(false);
+      return;
+    }
+
     assignUserRoles(editRolesUser.id, selectedRoles)
       .then(() => {
         setUsers((prev) =>
@@ -404,16 +416,23 @@ const UserListing = () => {
             u.id === editRolesUser.id
               ? {
                   ...u,
-                  roles: allRoles.filter((r) => selectedRoles.includes(r.id)),
+                  roles: [
+                    ...(u.roles || []),
+                    ...allRoles
+                      .filter((r) => rolesToAdd.includes(r.id))
+                      .map((r) => ({ id: r.id, name: r.name || r.role })),
+                  ].filter(
+                    (v, i, a) => a.findIndex((t) => t.id === v.id) === i
+                  ),
                 }
               : u
           )
         );
         closeEditRoles();
-        Swal.fire("Success", "Roles updated!", "success");
+        Swal.fire("Success", "Roles added!", "success");
       })
       .catch(() => {
-        Swal.fire("Error", "Failed to update roles", "error");
+        Swal.fire("Error", "Failed to add roles", "error");
       })
       .finally(() => setSavingRoles(false));
   };

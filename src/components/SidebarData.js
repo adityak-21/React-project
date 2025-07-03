@@ -21,6 +21,7 @@ export const SidebarData = [
     path: "/userActivity",
     icon: <IoIcons.IoIosPaper />,
     cName: "nav-text",
+    adminOnly: true,
   },
   {
     title: "My-Tasks",
