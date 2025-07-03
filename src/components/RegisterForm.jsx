@@ -123,13 +123,14 @@
 
 // export default connect(mapStateToProps, mapDispatchToProps)(RegisterForm);
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Field, reduxForm } from "redux-form";
 import { connect } from "react-redux";
 import { registerUser } from "../redux/authReducer";
 import { Link } from "react-router-dom";
 import "../style/RegisterForm.css";
 import { withRouter } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const renderField = ({
   input,
@@ -182,6 +183,16 @@ let RegisterForm = ({
   const onSubmit = (values) => {
     registerUser(values, history, isModal);
   };
+
+  useEffect(() => {
+    if (registered) {
+      Swal.fire({
+        icon: "success",
+        title: "Registration Successful",
+        text: "Confirmation email has been sent. Please check your inbox.",
+      });
+    }
+  }, [registered]);
 
   return (
     <form className="register-form" onSubmit={handleSubmit(onSubmit)}>

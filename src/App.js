@@ -36,12 +36,18 @@ import {
   setUserRoles,
 } from "./redux/userReducer";
 import { Loader } from "./common/Loading";
+import ForgotPwdForm from "./components/ForgotPwd";
+import ResetPwdForm from "./components/ResetPwd";
+import ConfirmEmail from "./components/ConfirmationPage";
 
 function AppContent() {
   const location = useLocation();
   const [id, setId] = useState(null);
   const [isFetching, setIsFetching] = useState(true);
-  const hideNavbar = ["/login", "/register"].includes(location.pathname);
+  const hideNavbar =
+    ["/login", "/register", "/forgotpwd"].includes(location.pathname) ||
+    location.pathname.startsWith("/resetpwd/") ||
+    location.pathname.startsWith("/confirmEmail/");
 
   const [sidebar, setSidebar] = useState(false);
 
@@ -85,6 +91,9 @@ function AppContent() {
         <Switch>
           <Route path="/login" component={LoginForm} />
           <Route path="/register" component={RegisterForm} />
+          <Route path="/forgotpwd" component={ForgotPwdForm} />
+          <Route path="/resetpwd/:token" component={ResetPwdForm} />
+          <Route path="/confirmEmail/:token" component={ConfirmEmail} />
           <PrivateRoute path="/userListing" component={UserListing} />
           <AdminRoute path="/userActivity" component={UserActivity} />
           <PrivateRoute path="/myTasks" component={MyTaskListing} />

@@ -87,6 +87,9 @@ const LoginForm = () => {
       <button className="login-btn" type="submit">
         Login
       </button>
+      <p className="text-center mt-3">
+        Fogot Password? <Link to="/forgotpwd">Click Here</Link>
+      </p>
     </form>
   );
 };

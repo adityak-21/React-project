@@ -62,3 +62,15 @@ export const me = () => {
     }
   );
 };
+
+export const forgotpwd = (requestBody) => {
+  return axios.post(`${BASE_URL}/forgotpwd`, requestBody);
+};
+
+export const resetpwd = (requestBody, token) => {
+  return axios.post(`${BASE_URL}/resetpwd/${token}`, requestBody);
+};
+
+export const confirmEmail = (token) => {
+  return axios.post(`${BASE_URL}/confirm-email/${token}`, {});
+};
