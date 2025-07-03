@@ -1,70 +1,184 @@
-# Getting Started with Create React App
+## Table of Contents
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+- [About](#about)
+- [Folder Structure](#folder-structure)
+- [Features](#features)
+- [Getting Started](#getting-started)
+- [Available Scripts](#available-scripts)
+- [Project Folders](#project-folders)
+- [Docker Support](#docker-support)
+
+---
+
+## About
+
+My React project.
+
+---
+
+## Folder Structure
+
+```
+my-react-app/
+├── node_modules/
+├── public/
+│   ├── favicon.ico
+│   ├── index.html
+│   ├── logo192.png
+│   ├── logo512.png
+│   ├── manifest.json
+│   └── robots.txt
+├── src/
+│   ├── api/
+│   │   ├── AnalyticsApi.js
+│   │   ├── AuthApi.js
+│   │   ├── NotificationsApi.js
+│   │   ├── RoleApi.js
+│   │   ├── TaskApi.js
+│   │   └── UserApi.js
+│   ├── common/
+│   │   ├── Debounce.jsx
+│   │   ├── Loading.jsx
+│   │   ├── Modal.jsx
+│   │   ├── Navbar.js
+│   │   ├── RegisterModal.jsx
+│   │   ├── Tooltip.jsx
+│   │   └── Topbar.js
+│   ├── components/
+│   │   ├── AdminRoute.js
+│   │   ├── AllTaskListing.jsx
+│   │   ├── ConfirnationPage.jsx
+│   │   ├── CreatedTaskListing.jsx
+│   │   ├── Dashboard.jsx
+│   │   ├── ForgotPwd.jsx
+│   │   ├── LoginForm.jsx
+│   │   ├── Logout.jsx
+│   │   ├── MyTaskListing.jsx
+│   │   ├── PrivateRoute.js
+│   │   ├── PusherListener.jsx
+│   │   ├── RegisterForm.jsx
+│   │   ├── ResetPwd.jsx
+│   │   ├── SendMessages.jsx
+│   │   ├── SidebarData.js
+│   │   ├── UserActivity.jsx
+│   │   └── UserListing.jsx
+│   ├── pages/
+│   │   └── LoginPage.jsx
+│   ├── redux/
+│   │   ├── authReducer.js
+│   │   ├── store.js
+│   │   ├── userReducer.js
+│   │   └── verifyAdmin.js
+│   ├── style/
+│   │   ├── Dashboard.css
+│   │   ├── LoginForm.css
+│   │   ├── Navbar.css
+│   │   ├── RegisterForm.css
+│   │   ├── RegisterModal.css
+│   │   ├── SendMessages.css
+│   │   ├── TaskListing.css
+│   │   ├── Tooltip.css
+│   │   ├── Topbar.css
+│   │   ├── UserActivity.css
+│   │   └── UserListing.css
+│   ├── App.css
+│   ├── App.js
+│   ├── App.test.js
+│   ├── index.css
+│   ├── index.js
+│   ├── logo.svg
+│   └── reportWebVitals.js
+├── .dockerignore
+├── .eslintric.json
+├── .gitignore
+├── default.conf
+├── Dockerfile
+├── package-lock.json
+├── package.json
+└── README.md
+```
+
+---
+
+## Features
+
+- **React**: Built with the latest React standards (functional components, hooks).
+- **API Layer**: Centralized API logic in `/src/api/` for clear API management.
+- **Redux**: State management with Redux for scalable data flow.
+- **Authentication & Authorization**: Support for login, registration, and admin/user roles.
+- **Reusable Components**: Collection of modals, tooltips, loading elements, etc.
+- **Protected Routes**: Guards for private/admin-only routes.
+- **Responsive UI**: Styled with modular CSS.
+- **Dockerized**: Containerized for easy deployment.
+- **Linting**: Configured with ESLint.
+
+---
+
+## Getting Started
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/yourusername/my-react-app.git
+   cd my-react-app
+   ```
+
+2. **Install dependencies:**
+
+   ```bash
+   npm install
+   ```
+
+3. **Run the application:**
+
+   ```bash
+   npm start
+   ```
+
+   The app will run at [http://localhost:3000](http://localhost:3000).
+
+4. **Build for production:**
+   ```bash
+   npm run build
+   ```
+
+---
 
 ## Available Scripts
 
-In the project directory, you can run:
+- `npm start` — Runs the app in development mode.
+- `npm test` — Launches the test runner.
+- `npm run build` — Builds the app for production.
+- `npm run lint` — Runs ESLint to check for code style issues.
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Project Folders
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **/public/**: Static files and app entry point.
+- **/src/api/**: API integration modules (Auth, User, Task, etc).
+- **/src/common/**: Shared UI components (Navbar, Modal, Tooltip, etc).
+- **/src/components/**: Main application components (Dashboard, Login, Listings, etc).
+- **/src/pages/**: Top-level page components (e.g., LoginPage).
+- **/src/redux/**: Redux setup, reducers, and store configuration.
+- **/src/style/**: CSS files for components and pages.
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Docker Support
 
-### `npm run build`
+1. **Build Docker image:**
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+   ```bash
+   docker build -t my-react-app .
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+2. **Run the container:**
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+   ```bash
+   docker run -p 3000:3000 my-react-app
+   ```
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+3. **Configuration:**
+   - `.dockerignore` — Files to ignore during Docker build.
+   - `default.conf`, `Dockerfile` — NGINX/React Docker configuration.
