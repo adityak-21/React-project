@@ -1,76 +1,38 @@
-import axios from "axios";
+import api from "./axiosInstance";
 
-const BASE_URL = "http://localhost:8000/api/v1";
-//xhr
-//axios
-// fetch
-//extend
-export const login = (requestBody) =>
-  axios.post(`${BASE_URL}/login`, requestBody);
+export const getAccessToken = () => {
+  return localStorage.getItem("access_token");
+};
 
-export const logout = () =>
-  axios.post(
-    `${BASE_URL}/logout`,
-    {},
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      },
-    }
-  );
+export const setAccessToken = (token) => {
+  localStorage.setItem("access_token", token);
+};
+
+export const removeAccessToken = () => {
+  localStorage.removeItem("access_token");
+};
+
+export const login = (requestBody) => api.post("/login", requestBody);
+
+export const logout = () => api.post("/logout");
 
 export const register = (requestBody, withAuth = true) => {
-  const headers =
-    withAuth && localStorage.getItem("access_token")
-      ? { Authorization: `Bearer ${localStorage.getItem("access_token")}` }
-      : {};
-  // console.log("headers", headers);
-  return axios.post(`${BASE_URL}/register`, requestBody, { headers });
+  if (withAuth) {
+    return api.post("/register", requestBody);
+  } else {
+    return api.post("/register", requestBody, { headers: {} });
+  }
 };
 
-export const verifyToken = () =>
-  axios.post(
-    `${BASE_URL}/validate`,
-    {},
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      },
-    }
-  );
+export const verifyToken = () => api.post("/validate");
 
-export const verifyAdmin = () => {
-  return axios.post(
-    `${BASE_URL}/isAdmin`,
-    {},
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      },
-    }
-  );
-};
+export const verifyAdmin = () => api.post("/isAdmin");
 
-export const me = () => {
-  return axios.post(
-    `${BASE_URL}/user-profile`,
-    {},
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      },
-    }
-  );
-};
+export const me = () => api.post("/user-profile");
 
-export const forgotpwd = (requestBody) => {
-  return axios.post(`${BASE_URL}/forgotpwd`, requestBody);
-};
+export const forgotpwd = (requestBody) => api.post("/forgotpwd", requestBody);
 
-export const resetpwd = (requestBody, token) => {
-  return axios.post(`${BASE_URL}/resetpwd/${token}`, requestBody);
-};
+export const resetpwd = (requestBody, token) =>
+  api.post(`/resetpwd/${token}`, requestBody);
 
-export const confirmEmail = (token) => {
-  return axios.post(`${BASE_URL}/confirm-email/${token}`, {});
-};
+export const confirmEmail = (token) => api.post(`/confirm-email/${token}`, {});

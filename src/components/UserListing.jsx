@@ -29,17 +29,7 @@ import { updateUserName } from "../api/UserApi";
 import { listRoles, assignUserRoles, removeUserRole } from "../api/RoleApi";
 import CloseIcon from "@material-ui/icons/Close";
 
-/**
- * debounce                                             done
- * Modal implement replace Swal
- * shift isAdmin to login page and redux store          done
- * Download with all users in the sepcified filters     done
- * sql injection
- * <div>link</div>
- * in-secure html
- *
- * shift isAdmin to login time so only one time loading
- */
+import { DownloadCSV } from "../common/DownloadCSV";
 
 const TABLE_COLUMNS = [
   { label: "Id", key: "id" },
@@ -334,29 +324,21 @@ const UserListing = () => {
     listUsers(allFilters)
       .then((res) => {
         const allUsers = res.data.users;
-        // stream
-        // batch processing
-        // yeild
-        // how to handle bulky apis
-        const csvContent = [
-          "Id,Name,Email,Role,Created By,Created At,Updated At",
-          ...allUsers.map(
-            (user) =>
-              `${user.id},${user.name},${user.email},${user.role},${user.created_by},${user.created_at},${user.updated_at}`
-          ),
-        ].join("\n");
-        const blob = new Blob([csvContent], {
-          type: "text/csv;charset=utf-8;",
-        });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", "users.csv");
-        link.style.visibility = "hidden";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        Swal.fire("Success", "CSV downloaded successfully", "success");
+        const fields = [
+          "id",
+          "name",
+          "email",
+          "roles",
+          "created_by",
+          "created_at",
+          "updated_at",
+        ];
+        const processedUsers = allUsers.map((user) => ({
+          ...user,
+          roles: user.roles ? user.roles.map((r) => r.name).join("; ") : "",
+        }));
+        console.log("Processed users for CSV:", processedUsers);
+        DownloadCSV(fields, processedUsers, "users.csv");
       })
       .catch((err) => {
         console.error("Failed to download CSV:", err);
@@ -380,6 +362,12 @@ const UserListing = () => {
   const closeEditRoles = () => {
     setEditRolesUser(null);
     setSelectedRoles([]);
+  };
+
+  const handleSelectRoles = (e) => {
+    setSelectedRoles(
+      Array.from(e.target.selectedOptions, (opt) => Number(opt.value))
+    );
   };
 
   const handleSaveName = () => {
@@ -583,13 +571,7 @@ const UserListing = () => {
               <select
                 multiple
                 value={selectedRoles}
-                onChange={(e) =>
-                  setSelectedRoles(
-                    Array.from(e.target.selectedOptions, (opt) =>
-                      Number(opt.value)
-                    )
-                  )
-                }
+                onChange={handleSelectRoles}
                 style={{ width: "100%", minHeight: "100px" }}
               >
                 {allRoles.map((role) => (

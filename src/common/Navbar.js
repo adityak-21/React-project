@@ -10,7 +10,7 @@ import { useSelector } from "react-redux";
 
 function Navbar({ sidebar, setSidebar }) {
   const showSidebar = () => setSidebar(!sidebar);
-  const isAdmin = useSelector((state) => state.admin.isAdmin);
+  const isAdmin = useSelector((state) => state?.admin?.isAdmin);
 
   return (
     <>

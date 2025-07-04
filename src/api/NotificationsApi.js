@@ -1,39 +1,12 @@
-import axios from "axios";
-
-const BASE_URL = "http://localhost:8000/api/v1";
+import api from "./axiosInstance";
 
 export const messageNotifications = (requestBody) =>
-  axios.post(`${BASE_URL}/sendMessage`, requestBody, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-    },
-  });
+  api.post("/sendMessage", requestBody);
 
 export const messagePrivateNotifications = (requestBody) =>
-  axios.post(`${BASE_URL}/sendToUser`, requestBody, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-    },
-  });
+  api.post("/sendToUser", requestBody);
 
-export const listNotifications = () =>
-  axios.post(
-    `${BASE_URL}/listNotifications`,
-    {},
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      },
-    }
-  );
+export const listNotifications = () => api.post("/listNotifications");
 
 export const markAsRead = (notificationId) =>
-  axios.post(
-    `${BASE_URL}/markAsRead/${notificationId}`,
-    {},
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      },
-    }
-  );
+  api.post(`/markAsRead/${notificationId}`);

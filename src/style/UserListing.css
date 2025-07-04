@@ -8,7 +8,6 @@
   letter-spacing: 1px;
 }
 
-/* Filter Form */
 .user-listing-search-form {
   display: flex;
   flex-wrap: wrap;
@@ -88,7 +87,6 @@
   }
 }
 
-/* Modal Styles */
 .modal-backdrop {
   position: fixed;
   z-index: 1300;
@@ -155,7 +153,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center; /* Center horizontally */
+  justify-content: center;
   gap: 1.2rem 2.2rem;
   padding: 1.1rem 1.6rem 0.7rem 1.6rem;
   margin: 0 auto 1.6rem auto;

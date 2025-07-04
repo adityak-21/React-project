@@ -31,6 +31,13 @@ export const loggingout = () => ({
   type: LOGOUT,
 });
 
+export const setUser = (user) => (dispatch) => {
+  dispatch(setUserName(user.name));
+  dispatch(setUserEmail(user.email));
+  dispatch(setUserId(user.id));
+  dispatch(setUserRoles(user.roles));
+};
+
 export function userReducer(state = initialState, action) {
   switch (action.type) {
     case SET_USER_NAME:

@@ -4,17 +4,16 @@ import { useHistory } from "react-router-dom";
 import { FaSignOutAlt } from "react-icons/fa";
 import { loggingout } from "../redux/userReducer";
 import { useDispatch } from "react-redux";
+import { removeAccessToken } from "../api/AuthApi";
 
 const Logout = () => {
   const history = useHistory();
   const dispatch = useDispatch();
-  const handleLogout = (event) => {
+  const handleLogout = async (event) => {
     event.preventDefault();
     try {
       dispatch(loggingout());
-      logout();
-      localStorage.removeItem("access_token");
-      history.push("/login");
+      await logout();
     } catch (error) {
       console.error("Logout failed:", error);
       alert(
@@ -22,6 +21,9 @@ const Logout = () => {
           error.message ||
           "Something went wrong. Please try again!"
       );
+    } finally {
+      removeAccessToken();
+      history.push("/login");
     }
   };
 

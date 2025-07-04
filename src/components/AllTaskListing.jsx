@@ -18,26 +18,13 @@ import Swal from "sweetalert2";
 import { LoaderRow } from "../common/Loading";
 import "../style/TaskListing.css";
 
-const STATUS_OPTIONS = [
-  { value: "", label: "All Statuses" },
-  { value: "assigned", label: "Assigned" },
-  { value: "in_progress", label: "In Progress" },
-  { value: "completed", label: "Completed" },
-  { value: "verified", label: "Verified" },
-];
-
-const SORT_BY_OPTIONS = [
-  { value: "", label: "Default" },
-  { value: "title", label: "Title" },
-  { value: "due_date", label: "Due Date" },
-  { value: "status", label: "Status" },
-];
-
-const SORT_ORDER_OPTIONS = [
-  { value: "", label: "Default" },
-  { value: "asc", label: "Ascending" },
-  { value: "desc", label: "Descending" },
-];
+import {
+  STATUS_OPTIONS,
+  SORT_BY_OPTIONS,
+  SORT_ORDER_OPTIONS,
+  FilterField,
+  NoTasksRow,
+} from "./TaskListing";
 
 const TABLE_COLUMNS = [
   { label: "Id", key: "id" },
@@ -63,18 +50,6 @@ const DEFAULT_FILTERS = {
   sort_by: "",
   sort_order: "",
 };
-
-function FilterField({ label, tooltip, ...rest }) {
-  return (
-    <Tooltip text={tooltip}>
-      {rest.type === "select" ? (
-        <select {...rest}>{rest.children}</select>
-      ) : (
-        <input {...rest} />
-      )}
-    </Tooltip>
-  );
-}
 
 function TaskFilterForm({ filters, handleInputChange }) {
   return (
@@ -203,16 +178,6 @@ function TaskTableRow({ task, onDelete }) {
         >
           Delete
         </Button>
-      </TableCell>
-    </TableRow>
-  );
-}
-
-function NoTasksRow({ colSpan }) {
-  return (
-    <TableRow>
-      <TableCell colSpan={colSpan} style={{ textAlign: "center" }}>
-        No tasks found
       </TableCell>
     </TableRow>
   );

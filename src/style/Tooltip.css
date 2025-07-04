@@ -3,15 +3,6 @@
   display: inline-block;
 }
 
-/*
-display - inline block, flex
-position,
-opcotiy 
-z-index 
-transform
-padding 
-margin
-*/
 .tooltip-box {
   position: absolute;
   bottom: 125%;

@@ -6,11 +6,9 @@ import {
   Redirect,
   useLocation,
 } from "react-router-dom";
-import LoginPage from "./pages/LoginPage";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
 import UserListing from "./components/UserListing";
-import PrivateRoute from "./components/PrivateRoute";
 import UserActivity from "./components/UserActivity";
 import Navbar from "./common/Navbar";
 import Logout from "./components/Logout";
@@ -19,7 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { verifyAdminStatus } from "./redux/verifyAdmin";
 import { verifyAdmin } from "./api/AuthApi";
 import MyTaskListing from "./components/MyTaskListing";
-import AdminRoute from "./components/AdminRoute";
+import ProtectedRoute from "./common/ProtectedRoute";
 import AllTaskListing from "./components/AllTaskListing";
 import CreatedTaskListing from "./components/CreatedTaskListing";
 import Dashboard from "./components/Dashboard";
@@ -29,16 +27,12 @@ import {
 } from "./components/PusherListener";
 import SendMessage from "./components/SendMessages";
 import { me } from "./api/AuthApi";
-import {
-  setUserName,
-  setUserEmail,
-  setUserId,
-  setUserRoles,
-} from "./redux/userReducer";
 import { Loader } from "./common/Loading";
 import ForgotPwdForm from "./components/ForgotPwd";
 import ResetPwdForm from "./components/ResetPwd";
 import ConfirmEmail from "./components/ConfirmationPage";
+import { setUser } from "./redux/userReducer";
+import Swal from "sweetalert2";
 
 function AppContent() {
   const location = useLocation();
@@ -55,20 +49,23 @@ function AppContent() {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        await dispatch(verifyAdminStatus(verifyAdmin));
-        const response = await me();
-        dispatch(setUserName(response.data.name));
-        dispatch(setUserEmail(response.data.email));
-        dispatch(setUserId(response.data.id));
-        dispatch(setUserRoles(response.data.roles));
-        setId(response.data.id);
-        console.log("User data fetched successfully:", response.data);
-      } catch (error) {
-        console.error("Failed to fetch user data:", error);
-      } finally {
-        setIsFetching(false);
-      }
+      dispatch(verifyAdminStatus(verifyAdmin))
+        .then(() => me())
+        .then((response) => {
+          if (!response || !response.data) {
+            throw new Error("Failed to fetch user data");
+          }
+          dispatch(setUser(response.data));
+          setId(response.data.id);
+          console.log("User data fetched successfully:", response.data);
+        })
+        .catch((error) => {
+          alert("Failed to fetch user data.");
+          console.error("Failed to fetch user data:", error);
+        })
+        .finally(() => {
+          setIsFetching(false);
+        });
     };
     fetchData();
   }, []);
@@ -94,13 +91,21 @@ function AppContent() {
           <Route path="/forgotpwd" component={ForgotPwdForm} />
           <Route path="/resetpwd/:token" component={ResetPwdForm} />
           <Route path="/confirmEmail/:token" component={ConfirmEmail} />
-          <PrivateRoute path="/userListing" component={UserListing} />
-          <AdminRoute path="/userActivity" component={UserActivity} />
-          <PrivateRoute path="/myTasks" component={MyTaskListing} />
-          <PrivateRoute path="/createdTasks" component={CreatedTaskListing} />
-          <PrivateRoute path="/dashboard" component={Dashboard} />
-          <PrivateRoute path="/sendMessage" component={SendMessage} />
-          <AdminRoute path="/allTasks" component={AllTaskListing} />
+          <ProtectedRoute path="/userListing" component={UserListing} />
+          <ProtectedRoute
+            path="/userActivity"
+            component={UserActivity}
+            adminOnly
+          />
+          <ProtectedRoute path="/myTasks" component={MyTaskListing} />
+          <ProtectedRoute path="/createdTasks" component={CreatedTaskListing} />
+          <ProtectedRoute path="/dashboard" component={Dashboard} />
+          <ProtectedRoute path="/sendMessage" component={SendMessage} />
+          <ProtectedRoute
+            path="/allTasks"
+            component={AllTaskListing}
+            adminOnly
+          />
           <Route path="/logout" component={Logout} />
           <Redirect from="/" to="/login" />
         </Switch>

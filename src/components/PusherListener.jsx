@@ -3,7 +3,7 @@ import Pusher from "pusher-js";
 
 export const PusherListener = () => {
   useEffect(() => {
-    const pusher = new Pusher("8e42ff484c6fad5a055a", {
+    const pusher = new Pusher(process.env.REACT_APP_PUSHER_KEY, {
       cluster: "ap2",
     });
 
@@ -21,37 +21,10 @@ export const PusherListener = () => {
   return null;
 };
 
-// export const PusherListenerPrivate = ({ userId }) => {
-//   console.log("PusherListenerPrivate initialized with userId:", userId);
-//   useEffect(() => {
-//     const pusher = new Pusher("8e42ff484c6fad5a055a", {
-//       cluster: "ap2",
-//       authEndpoint: "http://localhost:8000/broadcasting/auth",
-//       auth: {
-//         headers: {
-//           Authorization: "Bearer " + localStorage.getItem("access_token"),
-//         },
-//       },
-//     });
-
-//     const channel = pusher.subscribe(`private-user.${userId}`);
-//     channel.bind("message.sent", function (data) {
-//       alert("Received private message: " + data.message.content);
-//       console.log("Received private message:", data.message.content);
-//     });
-
-//     return () => {
-//       channel.unbind_all();
-//       channel.unsubscribe();
-//     };
-//   }, []);
-//   return null;
-// };
-
 export const PusherListenerPrivate = ({ userId }) => {
   console.log("PusherListenerPrivate initialized with userId:", userId);
   useEffect(() => {
-    const pusher = new Pusher("8e42ff484c6fad5a055a", {
+    const pusher = new Pusher(process.env.REACT_APP_PUSHER_KEY, {
       cluster: "ap2",
     });
 

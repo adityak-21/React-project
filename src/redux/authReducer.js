@@ -1,6 +1,8 @@
 import Swal from "sweetalert2";
 import { register } from "../api/AuthApi";
 import { verifyToken } from "../api/AuthApi";
+import { getAccessToken } from "../api/AuthApi";
+import { removeAccessToken } from "../api/AuthApi";
 
 const initialState = {
   registering: false,
@@ -25,14 +27,14 @@ export const registerUser =
   (formData, history, isModal = false) =>
   (dispatch) => {
     dispatch({ type: "REGISTER_REQUEST" });
-    const token = localStorage.getItem("access_token");
+    const token = getAccessToken();
     let isTokenValid = true;
     if (token) {
       try {
         verifyToken();
         isTokenValid = true;
       } catch (err) {
-        localStorage.removeItem("access_token");
+        removeAccessToken();
         isTokenValid = false;
       }
     }

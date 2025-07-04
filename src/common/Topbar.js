@@ -11,9 +11,10 @@ const Topbar = () => {
   const [notifHovered, setNotifHovered] = useState(false);
   const [profileHovered, setProfileHovered] = useState(false);
   const [notifications, setNotifications] = useState([]);
-  const userName = useSelector((state) => state.user.userName);
-  const userEmail = useSelector((state) => state.user.userEmail);
-  const userId = useSelector((state) => state.user.userId);
+  const user = useSelector((state) => state?.user);
+  const userName = user.userName || "N/A";
+  const userEmail = user.userEmail || "N/A";
+  const userId = user.userId || "N/A";
 
   useEffect(() => {
     listNotifications()
@@ -31,7 +32,7 @@ const Topbar = () => {
         console.error("Failed to fetch notifications:", error);
       });
 
-    const pusher = new Pusher("8e42ff484c6fad5a055a", {
+    const pusher = new Pusher(process.env.REACT_APP_PUSHER_KEY, {
       cluster: "ap2",
     });
 

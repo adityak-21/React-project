@@ -13,7 +13,6 @@ const SendMessage = () => {
     messageNotifications({ message })
       .then((response) => {
         console.log("Message sent successfully:", response.data);
-        // alert("Message sent successfully!");
       })
       .catch((error) => {
         console.error("Error sending message:", error);
@@ -35,7 +34,6 @@ const SendMessage = () => {
     })
       .then((response) => {
         console.log("Message sent successfully:", response.data);
-        // alert("Message sent successfully!");
       })
       .catch((error) => {
         console.error("Error sending message:", error);

@@ -124,11 +124,6 @@ const ListUserActivity = () => {
   const [activities, setActivities] = React.useState([]);
   const [activityFetching, setActivityFetching] = React.useState(false);
 
-  //useEffect
-  // first time render - componentDidMount
-  // when props changes - componentDidUpdate
-  // when the componets unmounts - componentWillUnmount
-
   const debouncedFilters = useDebounce(filters, 500);
 
   React.useEffect(() => {
@@ -159,7 +154,7 @@ const ListUserActivity = () => {
       ...(name !== "pagenumber" && name !== "perpage" && { pagenumber: 1 }),
     }));
   };
-  //why inline style is avoided ?
+
   return (
     <div>
       <h2 className="activity-listing-title">Activities-Listing</h2>
