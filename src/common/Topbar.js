@@ -6,6 +6,7 @@ import Pusher from "pusher-js";
 import { listNotifications } from "../api/NotificationsApi";
 import { markAsRead } from "../api/NotificationsApi";
 import { useSelector } from "react-redux";
+import { useRef } from "react";
 
 const Topbar = () => {
   const [notifHovered, setNotifHovered] = useState(false);
@@ -15,6 +16,7 @@ const Topbar = () => {
   const userName = user.userName || "N/A";
   const userEmail = user.userEmail || "N/A";
   const userId = user.userId || "N/A";
+  const notifTimeout = useRef(null);
 
   useEffect(() => {
     listNotifications()
@@ -74,8 +76,13 @@ const Topbar = () => {
     <div className="topbar-content">
       <div
         className="icon-wrapper"
-        onMouseEnter={() => setNotifHovered(true)}
-        onMouseLeave={() => setNotifHovered(false)}
+        onMouseEnter={() => {
+          clearTimeout(notifTimeout.current);
+          setNotifHovered(true);
+        }}
+        onMouseLeave={() => {
+          notifTimeout.current = setTimeout(() => setNotifHovered(false), 150);
+        }}
       >
         <AiOutlineBell size={28} />
         {notifications.length > 0 && (

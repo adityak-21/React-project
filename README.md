@@ -32,20 +32,22 @@ my-react-app/
 │   ├── api/
 │   │   ├── AnalyticsApi.js
 │   │   ├── AuthApi.js
+│   │   ├── axiosInstance.js
 │   │   ├── NotificationsApi.js
 │   │   ├── RoleApi.js
 │   │   ├── TaskApi.js
 │   │   └── UserApi.js
 │   ├── common/
 │   │   ├── Debounce.jsx
+│   │   ├── DownloadCSV.js
 │   │   ├── Loading.jsx
 │   │   ├── Modal.jsx
 │   │   ├── Navbar.js
+│   │   ├── ProtectedRoute.js
 │   │   ├── RegisterModal.jsx
 │   │   ├── Tooltip.jsx
 │   │   └── Topbar.js
 │   ├── components/
-│   │   ├── AdminRoute.js
 │   │   ├── AllTaskListing.jsx
 │   │   ├── ConfirnationPage.jsx
 │   │   ├── CreatedTaskListing.jsx
@@ -54,7 +56,6 @@ my-react-app/
 │   │   ├── LoginForm.jsx
 │   │   ├── Logout.jsx
 │   │   ├── MyTaskListing.jsx
-│   │   ├── PrivateRoute.js
 │   │   ├── PusherListener.jsx
 │   │   ├── RegisterForm.jsx
 │   │   ├── ResetPwd.jsx
@@ -62,8 +63,6 @@ my-react-app/
 │   │   ├── SidebarData.js
 │   │   ├── UserActivity.jsx
 │   │   └── UserListing.jsx
-│   ├── pages/
-│   │   └── LoginPage.jsx
 │   ├── redux/
 │   │   ├── authReducer.js
 │   │   ├── store.js
@@ -89,6 +88,7 @@ my-react-app/
 │   ├── logo.svg
 │   └── reportWebVitals.js
 ├── .dockerignore
+├── .env
 ├── .eslintric.json
 ├── .gitignore
 ├── default.conf
