@@ -7,3 +7,7 @@ export const assignUserRoles = (userId, roleIds) =>
 
 export const removeUserRole = (userId, roleId) =>
   api.post(`/users/${userId}/roles/${roleId}`);
+
+export const changeRoles = (userId, roleIds) => {
+  return api.post(`/users/${userId}/changeRoles`, { roles: roleIds });
+};

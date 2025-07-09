@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import "../style/RegisterForm.css";
 import { withRouter } from "react-router-dom";
 import Swal from "sweetalert2";
+import zxcvbn from "zxcvbn";
 
 const renderField = ({
   input,
@@ -44,6 +45,41 @@ const validate = (values) => {
   return errors;
 };
 
+const PasswordStrengthMeter = ({ password }) => {
+  const result = zxcvbn(password || "");
+  const score = result.score;
+  const strength = ["Weak", "Weak", "Fair", "Good", "Strong"][score];
+  const barColors = ["#e74c3c", "#e67e22", "#f1c40f", "#2ecc71", "#27ae60"];
+
+  return (
+    <div className="password-strength-meter">
+      <div className="meter-bar-background">
+        <div
+          className="meter-bar"
+          style={{
+            width: `${((score + 1) / 5) * 100}%`,
+            background: barColors[score],
+            height: "8px",
+            borderRadius: "4px",
+            transition: "width 0.3s",
+          }}
+        />
+      </div>
+      <div
+        className="meter-label"
+        style={{
+          color: barColors[score],
+          fontWeight: "bold",
+          marginTop: "4px",
+          fontSize: "0.95em",
+        }}
+      >
+        {strength}
+      </div>
+    </div>
+  );
+};
+
 let RegisterForm = ({
   handleSubmit,
   submitting,
@@ -54,8 +90,17 @@ let RegisterForm = ({
   registerUser,
   history,
   isModal = false,
+  passwordValue,
+  dispatch,
 }) => {
+  const [canSubmit, setCanSubmit] = useState(false);
+  useEffect(() => {
+    const result = zxcvbn(passwordValue || "");
+    setCanSubmit(result.score >= 2);
+  }, [passwordValue]);
+
   const onSubmit = (values) => {
+    if (!canSubmit) return;
     registerUser(values, history, isModal);
   };
 
@@ -93,14 +138,17 @@ let RegisterForm = ({
         id="email"
         placeholder="Enter email"
       />
-      <Field
-        name="password"
-        type="password"
-        component={renderField}
-        label="Password"
-        id="password"
-        placeholder="Password"
-      />
+      <div>
+        <Field
+          name="password"
+          type="password"
+          component={renderField}
+          label="Password"
+          id="password"
+          placeholder="Password"
+        />
+        <PasswordStrengthMeter password={passwordValue} />
+      </div>
       <Field
         name="password_confirmation"
         type="password"
@@ -112,10 +160,15 @@ let RegisterForm = ({
       <button
         className="register-btn"
         type="submit"
-        disabled={submitting || pristine}
+        disabled={submitting || pristine || !canSubmit}
       >
         Register
       </button>
+      {!canSubmit && passwordValue && (
+        <div style={{ color: "#e74c3c", marginTop: "6px" }}>
+          Password is too weak to register.
+        </div>
+      )}
       <p className="text-center mt-3">
         Already have an account? <Link to="/login">Login here</Link>
       </p>
@@ -131,6 +184,7 @@ const mapStateToProps = (state) => ({
   registering: state.auth.registering,
   registered: state.auth.registered,
   error: state.auth.error,
+  passwordValue: state.form?.register?.values?.password || "",
 });
 const mapDispatchToProps = (dispatch) => ({
   registerUser: (formData, history, isModal = false) =>

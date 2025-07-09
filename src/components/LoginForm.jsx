@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useHistory, Link } from "react-router-dom";
 import "../style/LoginForm.css";
 import { withRouter } from "react-router-dom";
@@ -15,19 +15,34 @@ import {
 } from "../redux/userReducer";
 import { setUser } from "../redux/userReducer";
 import { setAccessToken } from "../api/AuthApi";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const LoginForm = () => {
   const history = useHistory();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [recaptchaToken, setRecaptchaToken] = useState("");
+  const recaptchaRef = useRef(null);
 
   const dispatch = useDispatch();
 
+  const handleRecaptchaChange = (token) => {
+    setRecaptchaToken(token);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (!recaptchaToken) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please verify you are not a robot",
+      });
+      return;
+    }
     const requestBody = {
       email,
       password,
+      recaptchaToken,
     };
     login(requestBody)
       .then((response) => {
@@ -79,6 +94,12 @@ const LoginForm = () => {
           required
         />
       </div>
+
+      <ReCAPTCHA
+        ref={recaptchaRef}
+        sitekey={process.env.REACT_APP_SITE_KEY}
+        onChange={handleRecaptchaChange}
+      />
 
       <button className="login-btn" type="submit">
         Login

@@ -18,6 +18,9 @@ export const listUserActivities = (filters) =>
     perpage: filters.perpage,
   });
 
+export const getRecentActivities = (userId) =>
+  api.post("/getRecentActivities", { user_id: userId });
+
 export const deleteUsers = (userIds) =>
   api.post("/bulkdelete", { user_ids: userIds });
 

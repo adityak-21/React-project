@@ -1,0 +1,280 @@
+.user-listing-title {
+  text-align: center;
+  color: #23395d;
+  margin-top: 2.5rem;
+  margin-bottom: 2.5rem;
+  font-weight: 700;
+  font-size: 2rem;
+  letter-spacing: 1px;
+}
+
+.user-listing-search-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1rem 2rem;
+  align-items: flex-end;
+  justify-content: center;
+  margin: 0 auto 2rem auto;
+  max-width: 800px;
+  padding: 1.2rem 0.7rem 0.8rem 0.7rem;
+  background: #f6f8fa;
+  border-radius: 13px;
+  box-shadow: 0 2px 8px #e6e9f0;
+}
+
+.user-listing-search-form input {
+  padding: 0.64rem 1.1rem;
+  border: 1.2px solid #c5c5c5;
+  border-radius: 6px;
+  font-size: 1rem;
+  min-width: 130px;
+  max-width: 220px;
+  outline: none;
+  transition: border 0.2s;
+  background: #fff;
+  margin: 0;
+}
+
+.user-listing-search-form input:focus {
+  border: 1.5px solid #3949ab;
+  background: #f5fafe;
+}
+
+@media (max-width: 900px) {
+  .user-listing-search-form {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.05rem 0;
+    max-width: 99vw;
+    padding: 1.1rem 2vw 1.1rem 2vw;
+  }
+  .user-listing-search-form input {
+    min-width: 99%;
+    max-width: 99%;
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+
+.user-card-grid-modern {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2.2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.2rem 1.5rem 2rem 1.5rem;
+  justify-items: center;
+}
+
+.user-card-modern {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px 0 #dadde6;
+  min-height: 210px;
+  max-width: 350px;
+  width: 100%;
+  padding: 2rem 1.2rem 1.7rem 1.2rem;
+  transition: box-shadow 0.2s, transform 0.16s;
+  cursor: pointer;
+  border: 1px solid #f2f4f8;
+  position: relative;
+}
+
+.user-card-modern:hover {
+  box-shadow: 0 12px 36px 0 #c5cee0;
+  transform: translateY(-7px) scale(1.035);
+  border-color: #c1c7d4;
+}
+
+.user-card-modern-avatar {
+  margin-bottom: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-card-modern .MuiAvatar-root {
+  width: 64px !important;
+  height: 64px !important;
+  font-size: 1.9rem !important;
+  background: #3949ab !important;
+  box-shadow: 0 2px 8px #e4e6f7;
+}
+
+.user-card-modern-title {
+  font-weight: 700;
+  color: #23395d;
+  font-size: 1.19rem;
+  margin-bottom: 0.32rem;
+  letter-spacing: 0.01em;
+  text-align: center;
+}
+
+.user-card-modern-email {
+  color: #556080;
+  font-size: 1.04rem;
+  margin-bottom: 0.18rem;
+  text-align: center;
+  word-break: break-all;
+}
+
+.user-card-modern-role {
+  color: #5c7cff;
+  font-size: 1.03rem;
+  font-weight: 600;
+  margin-top: 0.18rem;
+  text-align: center;
+}
+
+@media (max-width: 700px) {
+  .user-card-grid-modern {
+    grid-template-columns: 1fr;
+    gap: 1.3rem;
+    padding: 1.3rem 0.4rem 1.3rem 0.4rem;
+  }
+  .user-card-modern {
+    min-height: 170px;
+    max-width: 100vw;
+    padding: 1.1rem 0.7rem 1.1rem 0.7rem;
+  }
+}
+
+/* Modal */
+.modal-content.user-modal {
+  background: #fff;
+  border-radius: 14px;
+  max-width: 440px;
+  max-height: 90vh;
+  width: 95vw;
+  padding: 2rem 1.6rem 1.4rem 1.6rem;
+  box-shadow: 0 2px 24px #b3b6c2;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+@media (max-width: 600px) {
+  .modal-content.user-modal {
+    padding: 1rem 0.5rem 1rem 0.5rem;
+    max-width: 99vw;
+    max-height: 95vh;
+  }
+}
+.user-modal-avatar-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.1rem;
+}
+.user-modal-info {
+  margin-bottom: 0.5rem;
+  font-size: 1.08rem;
+  color: #23395d;
+}
+.modal-close-btn {
+  margin-top: 1.1rem;
+  padding: 0.5rem 1.4rem;
+  font-size: 1rem;
+  border-radius: 7px;
+  border: none;
+  background: #3949ab;
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.modal-close-btn:hover {
+  background: #1c2a5d;
+}
+
+.user-modal-activities {
+  margin-top: 2.2rem;
+  margin-bottom: 0.8rem;
+}
+
+.user-modal-activities h4 {
+  margin: 0 0 1.1rem 0;
+  font-size: 1.07rem;
+  color: #3949ab;
+  letter-spacing: 0.01em;
+  font-weight: 700;
+}
+
+.activity-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  padding-left: 0.3rem;
+}
+
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.1rem;
+  position: relative;
+  background: #f7f8fd;
+  border-radius: 10px;
+  padding: 0.85rem 0.9rem 0.7rem 0.9rem;
+  box-shadow: 0 2px 8px #ecefff;
+}
+
+.activity-dot {
+  margin-top: 6px;
+  width: 13px;
+  height: 13px;
+  background: #5c7cff;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px #c9d7f7;
+  flex-shrink: 0;
+}
+
+.activity-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.16rem;
+  font-size: 0.97rem;
+  color: #2d3559;
+}
+
+.activity-duration {
+  font-size: 0.99rem;
+  font-weight: 600;
+  color: #3949ab;
+  margin-left: 0.7rem;
+  white-space: nowrap;
+  align-self: flex-end;
+}
+
+.act-label {
+  font-weight: 500;
+  color: #6a6f85;
+  margin-right: 2px;
+}
+
+.user-modal-activity-empty {
+  color: #bbb;
+  font-size: 0.98rem;
+  text-align: left;
+  padding: 0.5rem 0 0.5rem 0.7rem;
+}
+
+.admin-toggle-topright {
+  position: absolute;
+  top: 80px;
+  right: 32px;
+  z-index: 2000;
+  display: flex;
+  gap: 0.7rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px #e6e9f0;
+  padding: 7px 16px;
+  align-items: center;
+}

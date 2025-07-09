@@ -10,3 +10,5 @@ export const listNotifications = () => api.post("/listNotifications");
 
 export const markAsRead = (notificationId) =>
   api.post(`/markAsRead/${notificationId}`);
+
+export const getRecent = () => api.post("/getRecent");

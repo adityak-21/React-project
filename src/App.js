@@ -20,6 +20,7 @@ import MyTaskListing from "./components/MyTaskListing";
 import ProtectedRoute from "./common/ProtectedRoute";
 import AllTaskListing from "./components/AllTaskListing";
 import CreatedTaskListing from "./components/CreatedTaskListing";
+import CardUserListing from "./components/CardUserListing";
 import Dashboard from "./components/Dashboard";
 import {
   PusherListener,
@@ -33,6 +34,7 @@ import ResetPwdForm from "./components/ResetPwd";
 import ConfirmEmail from "./components/ConfirmationPage";
 import { setUser } from "./redux/userReducer";
 import Swal from "sweetalert2";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 function AppContent() {
   const location = useLocation();
@@ -92,6 +94,7 @@ function AppContent() {
           <Route path="/resetpwd/:token" component={ResetPwdForm} />
           <Route path="/confirmEmail/:token" component={ConfirmEmail} />
           <ProtectedRoute path="/userListing" component={UserListing} />
+          <ProtectedRoute path="/cardUserListing" component={CardUserListing} />
           <ProtectedRoute
             path="/userActivity"
             component={UserActivity}

@@ -17,6 +17,8 @@ import { useLocation } from "react-router-dom";
 import { LoaderRow } from "../common/Loading";
 import "../style/TaskListing.css";
 
+import TaskViewModal from "../common/TaskViewModal";
+
 import {
   STATUS_OPTIONS,
   SORT_BY_OPTIONS,
@@ -139,7 +141,7 @@ function TaskFilterForm({ filters, handleInputChange }) {
   );
 }
 
-function TaskTableRow({ task, handleStatusChange }) {
+function TaskTableRow({ task, handleStatusChange, onView }) {
   return (
     <TableRow>
       {TABLE_COLUMNS.map((col) =>
@@ -149,19 +151,29 @@ function TaskTableRow({ task, handleStatusChange }) {
               <select
                 value={task.status}
                 onChange={(e) => handleStatusChange(task.id, e.target.value)}
+                className={`status-select status-${task.status}`}
               >
                 <option value="assigned">Assigned</option>
                 <option value="in_progress">In Progress</option>
                 <option value="completed">Completed</option>
               </select>
             ) : (
-              <span>Verified</span>
+              <span className="status-badge verified">Verified</span>
             )}
           </TableCell>
         ) : (
           <TableCell key={col.key}>{task[col.key]}</TableCell>
         )
       )}
+      <TableCell>
+        <button
+          className="view-task-btn"
+          onClick={() => onView(task)}
+          title="View Task Details"
+        >
+          View
+        </button>
+      </TableCell>
     </TableRow>
   );
 }
@@ -172,6 +184,7 @@ function HeadRow() {
       {TABLE_COLUMNS.map((col) => (
         <TableCell key={col.key}>{col.label}</TableCell>
       ))}
+      <TableCell>View</TableCell>
     </TableRow>
   );
 }
@@ -199,6 +212,8 @@ const MyTaskListing = () => {
   const [tasks, setTasks] = useState([]);
   const [taskFetching, setTaskFetching] = useState(false);
   const [selectedTasks, setSelectedTasks] = useState([]);
+  const [viewTask, setViewTask] = useState(null);
+  const userName = useSelector((state) => state.user.userName);
 
   useEffect(() => {
     const urlStatus = getStatusFromQuery();
@@ -247,6 +262,17 @@ const MyTaskListing = () => {
       });
   };
 
+  const handleViewTask = (task) => {
+    setViewTask({
+      ...task,
+      assignee: userName,
+    });
+  };
+
+  const handleCloseView = () => {
+    setViewTask(null);
+  };
+
   return (
     <div>
       <h2 className="my-task-listing-title">My-Tasks-Listing</h2>
@@ -266,11 +292,17 @@ const MyTaskListing = () => {
                   task={task}
                   key={`${task.id}`}
                   handleStatusChange={handleStatusChange}
+                  onView={handleViewTask}
                 />
               ))}
           </TableBody>
         </Table>
       </TableContainer>
+      <TaskViewModal
+        open={!!viewTask}
+        task={viewTask}
+        onClose={handleCloseView}
+      />
     </div>
   );
 };

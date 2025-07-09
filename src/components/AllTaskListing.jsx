@@ -17,6 +17,7 @@ import Swal from "sweetalert2";
 
 import { LoaderRow } from "../common/Loading";
 import "../style/TaskListing.css";
+import TaskViewModal from "../common/TaskViewModal";
 
 import {
   STATUS_OPTIONS,
@@ -163,12 +164,21 @@ function TaskFilterForm({ filters, handleInputChange }) {
   );
 }
 
-function TaskTableRow({ task, onDelete }) {
+function TaskTableRow({ task, onDelete, onView }) {
   return (
     <TableRow>
       {TABLE_COLUMNS.map((col) => (
         <TableCell key={col.key}>{task[col.key]}</TableCell>
       ))}
+      <TableCell>
+        <button
+          className="view-task-btn"
+          onClick={() => onView(task)}
+          title="View Task Details"
+        >
+          View
+        </button>
+      </TableCell>
       <TableCell>
         <Button
           size="small"
@@ -189,6 +199,7 @@ function HeadRow() {
       {TABLE_COLUMNS.map((col) => (
         <TableCell key={col.key}>{col.label}</TableCell>
       ))}
+      <TableCell>View</TableCell>
       <TableCell>Actions</TableCell>
     </TableRow>
   );
@@ -200,6 +211,7 @@ const AllTaskListing = () => {
   const [tasks, setTasks] = useState([]);
   const [taskFetching, setTaskFetching] = useState(false);
   const [selectedTasks, setSelectedTasks] = useState([]);
+  const [viewTask, setViewTask] = useState(null);
 
   const debouncedFilters = useDebounce(filters, 500);
   useEffect(() => {
@@ -250,6 +262,14 @@ const AllTaskListing = () => {
     });
   };
 
+  const handleViewTask = (task) => {
+    setViewTask(task);
+  };
+
+  const handleCloseView = () => {
+    setViewTask(null);
+  };
+
   return (
     <div>
       <h2 className="my-task-listing-title">All-Tasks-Listing</h2>
@@ -271,11 +291,17 @@ const AllTaskListing = () => {
                   task={task}
                   key={`${task.id}`}
                   onDelete={handleDelete}
+                  onView={handleViewTask}
                 />
               ))}
           </TableBody>
         </Table>
       </TableContainer>
+      <TaskViewModal
+        open={!!viewTask}
+        task={viewTask}
+        onClose={handleCloseView}
+      />
     </div>
   );
 };

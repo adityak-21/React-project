@@ -69,3 +69,7 @@ export function createTask(requestBody) {
 export function deleteTask(taskId) {
   return api.post(`/deleteTask/${taskId}`);
 }
+
+export function getTodayTasks() {
+  return api.post("/getTodayTasks");
+}

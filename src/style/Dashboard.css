@@ -112,3 +112,147 @@ p {
     gap: 22px 0;
   }
 }
+
+.dashboard-root {
+  display: flex;
+  flex-direction: row;
+}
+
+.main-dashboard-content {
+  flex: 1 1 auto;
+  margin-right: 290px;
+}
+
+.dashboard-right-sidebars {
+  position: fixed;
+  right: 24px;
+  top: 70px;
+  width: 260px;
+  max-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  z-index: 100;
+}
+
+.sidebar-panel {
+  background: #fff;
+  border-radius: 14px;
+  border: 2px solid #eaeaea;
+  box-shadow: 0 2px 16px 0 rgba(44, 62, 80, 0.08);
+  padding: 18px 14px 12px 14px;
+  flex: 1 1 0;
+  min-height: 140px;
+  max-height: 43vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-panel h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: #2d6cdf;
+  font-size: 1.19rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.sidebar-panel ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-panel li.activity-list-item {
+  border-bottom: 1px solid #f0f4fa;
+  padding: 12px 0 6px 0;
+  display: block;
+}
+
+.sidebar-panel li.activity-list-item:last-child {
+  border-bottom: none;
+}
+
+.sidebar-panel .activity-text {
+  color: #394867;
+  font-weight: 500;
+  font-size: 1.01rem;
+  line-height: 1.4;
+  word-break: break-word;
+  margin-bottom: 2px;
+  white-space: pre-wrap;
+}
+
+.sidebar-panel .activity-time {
+  color: #888;
+  font-size: 0.93rem;
+  font-style: italic;
+  display: block;
+  margin-left: 0;
+  margin-top: 2px;
+}
+
+.sidebar-panel li:last-child {
+  border-bottom: none;
+}
+
+.sidebar-panel .task-title,
+.sidebar-panel .activity {
+  color: #394867;
+  font-weight: 500;
+  flex: 1 1 auto;
+}
+
+.sidebar-panel .due,
+.sidebar-panel .time {
+  color: #888;
+  font-size: 0.93rem;
+  margin-left: 15px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.sidebar-panel .empty-state {
+  color: #b3b3b3;
+  font-style: italic;
+  padding: 8px 0;
+  border-bottom: none;
+}
+
+.sidebar-panel li.today-task-list-item {
+  border-bottom: 1px solid #f0f4fa;
+  padding: 12px 0 6px 0;
+  display: block;
+}
+
+.sidebar-panel li.today-task-list-item:last-child {
+  border-bottom: none;
+}
+
+.sidebar-panel .today-task-title {
+  color: #394867;
+  font-weight: 500;
+  font-size: 1.03rem;
+  line-height: 1.5;
+  word-break: break-word;
+  margin-bottom: 2px;
+  white-space: pre-wrap;
+}
+
+.sidebar-panel .today-task-due {
+  color: #9b59b6;
+  font-size: 0.95rem;
+  display: block;
+  margin-top: 2px;
+  font-style: italic;
+}
+
+@media (max-width: 1100px) {
+  .dashboard-right-sidebars {
+    display: none;
+  }
+  .main-dashboard-content {
+    margin-right: 0;
+  }
+}

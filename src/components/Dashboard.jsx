@@ -11,6 +11,11 @@ import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import "../style/Dashboard.css";
 import { useSelector } from "react-redux";
+import { getRecent } from "../api/NotificationsApi";
+import { getTodayTasks } from "../api/TaskApi";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.extend(relativeTime);
 
 const SUMMARY_CONFIG = [
   { key: "assigned", label: "Assigned", color: "#2d6cdf", clickable: true },
@@ -41,7 +46,25 @@ const Dashboard = () => {
   const userEmail = useSelector((state) => state.user.userEmail);
   const userId = useSelector((state) => state.user.userId);
   const userRoles = useSelector((state) => state.user.userRoles);
+  const [recentActivities, setRecentActivities] = useState([]);
+  const [todayDueTasks, setTodayDueTasks] = useState([]);
   useEffect(() => {
+    getTodayTasks()
+      .then((response) => {
+        setTodayDueTasks(response.data.tasks);
+        console.log("Today's due tasks fetched successfully:", response.data);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch today's due tasks:", error);
+      });
+    getRecent().then((res) => {
+      setRecentActivities(
+        res.data.map((a) => ({
+          ...a,
+          time: dayjs(a.time).fromNow(),
+        }))
+      );
+    });
     myTaskStatusStats()
       .then((response) => {
         setMyTasks(response.data);
@@ -159,49 +182,90 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="container" style={{ maxWidth: 900, marginTop: 50 }}>
-      <div>
-        <h2>Welcome, {userName}!</h2>
-        <p>Id: {userId}</p>
-        <p>Email: {userEmail}</p>
-        <p>Roles: {roleNames.join(", ")}</p>
-      </div>
+    <div className="dashboard-root">
+      <div
+        className="container main-dashboard-content"
+        style={{ maxWidth: 900, marginTop: 50 }}
+      >
+        <div>
+          <h2>Welcome, {userName}!</h2>
+          <p>Id: {userId}</p>
+          <p>Email: {userEmail}</p>
+          <p>Roles: {roleNames.join(", ")}</p>
+        </div>
 
-      <div className="task-summary-slab">
-        {SUMMARY_CONFIG.map(({ key, label, color, clickable }) => (
-          <SummaryCard
-            key={key}
-            color={color}
-            label={label}
-            value={myTasks[key]}
-            onClick={clickable ? () => handleSummaryCardClick(key) : undefined}
+        <div className="task-summary-slab">
+          {SUMMARY_CONFIG.map(({ key, label, color, clickable }) => (
+            <SummaryCard
+              key={key}
+              color={color}
+              label={label}
+              value={myTasks[key]}
+              onClick={
+                clickable ? () => handleSummaryCardClick(key) : undefined
+              }
+            />
+          ))}
+        </div>
+
+        <div className="dashboard-charts">
+          <HighchartsReact
+            highcharts={Highcharts}
+            options={options}
+            style={{ width: "100%", height: "400px" }}
+          >
+            {" "}
+          </HighchartsReact>
+          <HighchartsReact
+            highcharts={Highcharts}
+            options={avgCompletionOptions}
+            style={{ width: "100%", height: "400px", marginTop: "20px" }}
           />
-        ))}
+          <HighchartsReact
+            highcharts={Highcharts}
+            options={assignedCreatedOptions}
+            style={{ width: "100%", height: "400px", marginTop: "20px" }}
+          />
+          <HighchartsReact
+            highcharts={Highcharts}
+            options={oldestOpenOptions}
+            style={{ width: "100%", height: "400px", marginTop: "20px" }}
+          />
+        </div>
       </div>
-
-      <div className="dashboard-charts">
-        <HighchartsReact
-          highcharts={Highcharts}
-          options={options}
-          style={{ width: "100%", height: "400px" }}
-        >
-          {" "}
-        </HighchartsReact>
-        <HighchartsReact
-          highcharts={Highcharts}
-          options={avgCompletionOptions}
-          style={{ width: "100%", height: "400px", marginTop: "20px" }}
-        />
-        <HighchartsReact
-          highcharts={Highcharts}
-          options={assignedCreatedOptions}
-          style={{ width: "100%", height: "400px", marginTop: "20px" }}
-        />
-        <HighchartsReact
-          highcharts={Highcharts}
-          options={oldestOpenOptions}
-          style={{ width: "100%", height: "400px", marginTop: "20px" }}
-        />
+      <div className="dashboard-right-sidebars">
+        <div className="sidebar-panel">
+          <h3>Today's Tasks</h3>
+          <ul>
+            {todayDueTasks.length === 0 ? (
+              <li className="empty-state">No tasks due today.</li>
+            ) : (
+              todayDueTasks.map((task) => (
+                <li key={task.id} className="today-task-list-item">
+                  <div className="today-task-title">{task.title}</div>
+                  <div className="today-task-due">
+                    {dayjs(task.due_date).format("MMM D, YYYY h:mm A")}
+                  </div>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
+        <div className="sidebar-panel">
+          <h3>Recent Activities</h3>
+          <ul>
+            {recentActivities.length === 0 ? (
+              <li className="empty-state">No recent activity.</li>
+            ) : (
+              recentActivities.map((act, idx) => (
+                <li key={idx} className="activity-list-item">
+                  <div className="activity-text">{act.activity}</div>
+                  <div className="activity-time">{act.time}</div>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
       </div>
     </div>
   );

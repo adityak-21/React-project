@@ -12,7 +12,7 @@ export const SidebarData = [
   },
   {
     title: "User-Listing",
-    path: "/userListing",
+    path: "/cardUserListing",
     icon: <AiIcons.AiFillHome />,
     cName: "nav-text",
   },

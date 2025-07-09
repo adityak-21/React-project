@@ -14,14 +14,19 @@ import { Tooltip } from "../common/Tooltip";
 import { updateTaskStatus } from "../api/TaskApi";
 import { updateTaskDueDate } from "../api/TaskApi";
 import { updateTaskDescription } from "../api/TaskApi";
-import { Button } from "@material-ui/core";
+import { Button, IconButton } from "@material-ui/core";
 import { listUsers } from "../api/UserApi";
 import { createTask } from "../api/TaskApi";
+import EditIcon from "@material-ui/icons/Edit";
+import CalendarTodayIcon from "@material-ui/icons/CalendarToday";
+import CheckIcon from "@material-ui/icons/Check";
+import CloseIcon from "@material-ui/icons/Close";
 
 import { LoaderRow } from "../common/Loading";
 import "../style/TaskListing.css";
 
 import { Modal } from "../common/Modal";
+import TaskViewModal from "../common/TaskViewModal";
 
 import {
   STATUS_OPTIONS,
@@ -145,70 +150,151 @@ function TaskFilterForm({ filters, handleInputChange }) {
   );
 }
 
+function TaskDueDateCell({ task, onSave }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(
+    task.due_date ? task.due_date.substring(0, 16) : ""
+  );
+
+  return (
+    <td>
+      {!editing ? (
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <span style={{ flex: 1 }}>
+            {task.due_date
+              ? task.due_date.replace("T", " ").substring(0, 16)
+              : "-"}
+          </span>
+          <IconButton
+            size="small"
+            className="edit-icon-btn"
+            onClick={() => setEditing(true)}
+            aria-label="edit-due-date"
+          >
+            <CalendarTodayIcon fontSize="small" />
+          </IconButton>
+        </div>
+      ) : (
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <input
+            type="datetime-local"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            style={{ minWidth: 180 }}
+            autoFocus
+          />
+          <IconButton
+            size="small"
+            onClick={() => {
+              onSave(task.id, value);
+              setEditing(false);
+            }}
+            aria-label="save-due-date"
+          >
+            <CheckIcon style={{ color: "#249d5b" }} />
+          </IconButton>
+          <IconButton
+            size="small"
+            onClick={() => {
+              setEditing(false);
+              setValue(task.due_date ? task.due_date.substring(0, 16) : "");
+            }}
+            aria-label="cancel-due-date"
+          >
+            <CloseIcon style={{ color: "#e74c3c" }} />
+          </IconButton>
+        </div>
+      )}
+    </td>
+  );
+}
+
 function TaskTableRow({
   task,
   handleStatusChange,
   handleDueDateChange,
   handleTitleChange,
   handleDescriptionChange,
+  onView,
 }) {
   return (
     <TableRow>
       <TableCell>{task.id}</TableCell>
       <TableCell>
-        <span
-          style={{
-            cursor: "pointer",
-            textDecoration: "underline",
-            color: task.title ? "#1976d2" : "#999",
-          }}
-          onClick={() => handleTitleChange(task)}
-          title={task.title ? "Click to edit title" : "Click to add title"}
-        >
-          {task.title || "No Title"}
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <span
+            className="editable-cell"
+            style={{
+              cursor: "pointer",
+              color: task.description ? "#1976d2" : "#999",
+              flex: 1,
+            }}
+            onClick={() => handleTitleChange(task)}
+          >
+            {task.title || "No Title"}
+          </span>
+          <IconButton
+            size="small"
+            className="edit-icon-btn"
+            onClick={() => handleTitleChange(task)}
+            aria-label="edit-description"
+          >
+            <EditIcon fontSize="small" />
+          </IconButton>
+        </div>
       </TableCell>
       <TableCell>
-        <span
-          style={{
-            cursor: "pointer",
-            textDecoration: "underline",
-            color: task.description ? "#1976d2" : "#999",
-          }}
-          onClick={() => handleDescriptionChange(task)}
-          title={
-            task.description
-              ? "Click to edit description"
-              : "Click to add description"
-          }
-        >
-          {task.description || "No Description"}
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <span
+            className="editable-cell"
+            style={{
+              cursor: "pointer",
+              color: task.description ? "#1976d2" : "#999",
+              flex: 1,
+            }}
+            onClick={() => handleDescriptionChange(task)}
+          >
+            {task.description || "No Description"}
+          </span>
+          <IconButton
+            size="small"
+            className="edit-icon-btn"
+            onClick={() => handleDescriptionChange(task)}
+            aria-label="edit-description"
+          >
+            <EditIcon fontSize="small" />
+          </IconButton>
+        </div>
       </TableCell>
       <TableCell>{task.assignee}</TableCell>
       <TableCell>
-        <input
-          type="datetime-local"
-          value={task.due_date ? task.due_date.substring(0, 16) : ""}
-          onChange={(e) => handleDueDateChange(task.id, e.target.value)}
-          style={{ minWidth: 180 }}
-        />
+        <TaskDueDateCell task={task} onSave={handleDueDateChange} />
       </TableCell>
       <TableCell>
         {task.status !== "verified" ? (
           <select
             value={task.status}
             onChange={(e) => handleStatusChange(task.id, e.target.value)}
+            className={`status-select status-${task.status}`}
           >
             <option value={task.status}>{task.status}</option>
             <option value="verified">Verified</option>
           </select>
         ) : (
-          <span>Verified</span>
+          <span className="status-badge verified">Verified</span>
         )}
       </TableCell>
       <TableCell>{task.created_at}</TableCell>
       <TableCell>{task.updated_at}</TableCell>
+      <TableCell>
+        <button
+          className="view-task-btn"
+          onClick={() => onView(task)}
+          title="View Task Details"
+        >
+          View
+        </button>
+      </TableCell>
     </TableRow>
   );
 }
@@ -219,6 +305,7 @@ function HeadRow() {
       {TABLE_COLUMNS.map((col) => (
         <TableCell key={col.key}>{col.label}</TableCell>
       ))}
+      <TableCell>View</TableCell>
     </TableRow>
   );
 }
@@ -259,6 +346,8 @@ const CreatedTaskListing = () => {
   const [assigneeOptions, setAssigneeOptions] = useState([]);
   const [assigneeLoading, setAssigneeLoading] = useState(false);
   const debouncedAssigneeSearch = useDebounce(assigneeSearch, 400);
+  const [viewTask, setViewTask] = useState(null);
+  const userName = useSelector((state) => state.user.userName);
 
   const debouncedFilters = useDebounce(filters, 500);
   useEffect(() => {
@@ -327,13 +416,13 @@ const CreatedTaskListing = () => {
 
   const handleEditTitle = (task) => {
     setSelectedTaskId(task.id);
-    setEditTaskTitle(task.title);
+    setEditTaskTitle(task.title || "");
     setIsTitleModalOpen(true);
   };
 
   const handleEditDescription = (task) => {
     setSelectedTaskId(task.id);
-    setEditTaskDescription(task.description);
+    setEditTaskDescription(task.description || "");
     setIsDescriptionModalOpen(true);
   };
 
@@ -401,6 +490,17 @@ const CreatedTaskListing = () => {
       });
   };
 
+  const handleViewTask = (task) => {
+    setViewTask({
+      ...task,
+      created_by: userName,
+    });
+  };
+
+  const handleCloseView = () => {
+    setViewTask(null);
+  };
+
   return (
     <div>
       <h2 className="my-task-listing-title">My-Created-Tasks-Listing</h2>
@@ -434,6 +534,7 @@ const CreatedTaskListing = () => {
                   handleDueDateChange={handleDueDateChange}
                   handleTitleChange={handleEditTitle}
                   handleDescriptionChange={handleEditDescription}
+                  onView={handleViewTask}
                 />
               ))}
           </TableBody>
@@ -596,6 +697,11 @@ const CreatedTaskListing = () => {
           </form>
         </div>
       </Modal>
+      <TaskViewModal
+        open={!!viewTask}
+        task={viewTask}
+        onClose={handleCloseView}
+      />
     </div>
   );
 };
