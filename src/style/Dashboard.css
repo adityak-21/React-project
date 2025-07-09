@@ -126,9 +126,9 @@ p {
 .dashboard-right-sidebars {
   position: fixed;
   right: 24px;
-  top: 70px;
+  top: 100px;
   width: 260px;
-  max-height: calc(100vh - 80px);
+  max-height: calc(100vh - 120px);
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -136,17 +136,50 @@ p {
 }
 
 .sidebar-panel {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  min-height: 10px;
+  max-height: 43vh;
   background: #fff;
   border-radius: 14px;
   border: 2px solid #eaeaea;
   box-shadow: 0 2px 16px 0 rgba(44, 62, 80, 0.08);
-  padding: 18px 14px 12px 14px;
-  flex: 1 1 0;
-  min-height: 140px;
-  max-height: 43vh;
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+}
+
+.sidebar-panel-content {
+  flex: 1 1 auto;
   overflow-y: auto;
+  max-height: 300px;
+  padding: 18px 14px 12px 14px;
   display: flex;
   flex-direction: column;
+}
+
+.sidebar-panel-togglebar {
+  width: 100%;
+  background: #fff;
+  border: none;
+  border-radius: 0 0 14px 14px;
+  color: #2d6cdf;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 12px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 -2px 8px 0 rgba(44, 62, 80, 0.06);
+  border-top: 2px solid #eaeaea;
+  transition: background 0.2s;
+  position: static;
+}
+
+.sidebar-panel-togglebar:hover {
+  background: #eaf3ff;
 }
 
 .sidebar-panel h3 {
@@ -255,4 +288,58 @@ p {
   .main-dashboard-content {
     margin-right: 0;
   }
+}
+
+.sidebar-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.collapse-btn {
+  background: none;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+  color: #888;
+}
+.collapse-btn:hover {
+  color: #1a83ff;
+}
+.icon-btn {
+  border: none;
+  background: none;
+  padding: 2px;
+  margin-left: 6px;
+  cursor: pointer;
+  font-size: 1.1em;
+  vertical-align: middle;
+  color: #2d6cdf;
+  transition: color 0.15s;
+}
+.icon-btn:hover,
+.icon-btn:focus {
+  color: #174a8c;
+  outline: none;
+  background: #f0f4fa;
+  border-radius: 50%;
+}
+
+.modern-btn.save,
+.modern-btn.cancel {
+  padding: 1px 7px;
+  font-size: 1em;
+  border-radius: 4px;
+  margin-left: 4px;
+  min-width: 0;
+  height: 26px;
+  line-height: 1;
+}
+
+.modern-btn.save {
+  background: #5cb85c;
+  color: #fff;
+}
+.modern-btn.cancel {
+  background: #e0e0e0;
+  color: #555;
 }

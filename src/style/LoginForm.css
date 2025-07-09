@@ -43,6 +43,28 @@ input[type="password"]:focus {
   border: 1.5px solid #1e88e5;
 }
 
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  padding-left: 2px;
+}
+
+.remember-me input[type="checkbox"] {
+  accent-color: #1e88e5;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+.remember-me label {
+  font-size: 14.5px;
+  color: #23395d;
+  cursor: pointer;
+  user-select: none;
+}
+
 .login-btn {
   background: #1e88e5;
   color: #fff;

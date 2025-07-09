@@ -7,10 +7,12 @@ import { IconContext } from "react-icons";
 import "../style/Navbar.css";
 import Logout from "../components/Logout";
 import { useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 
 function Navbar({ sidebar, setSidebar }) {
   const showSidebar = () => setSidebar(!sidebar);
   const isAdmin = useSelector((state) => state?.admin?.isAdmin);
+  const location = useLocation();
 
   return (
     <>
@@ -29,8 +31,12 @@ function Navbar({ sidebar, setSidebar }) {
             </li>
             {SidebarData.filter((item) => !item.adminOnly || isAdmin).map(
               (item, index) => {
+                const isActive = location.pathname === item.path;
                 return (
-                  <li key={index} className={item.cName}>
+                  <li
+                    key={index}
+                    className={isActive ? `${item.cName} active` : item.cName}
+                  >
                     <Link to={item.path}>
                       {item.icon}
                       <span>{item.title}</span>

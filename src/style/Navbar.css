@@ -97,3 +97,16 @@ span {
 .main-content {
   transition: margin-left 0.3s;
 }
+
+.nav-menu-items li.active {
+  background-color: #0d0d0d;
+  color: #fff;
+}
+
+.nav-menu-items li.active a {
+  color: #fff;
+}
+
+.nav-menu-items li.active svg {
+  color: #fff;
+}

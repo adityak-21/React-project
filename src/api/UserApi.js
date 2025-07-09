@@ -26,3 +26,5 @@ export const deleteUsers = (userIds) =>
 
 export const updateUserName = (userId, name) =>
   api.post(`/update-name/${userId}`, { name });
+
+export const updateMyName = (name) => api.post("/update-name", { name });

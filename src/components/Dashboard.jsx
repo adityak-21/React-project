@@ -13,6 +13,10 @@ import "../style/Dashboard.css";
 import { useSelector } from "react-redux";
 import { getRecent } from "../api/NotificationsApi";
 import { getTodayTasks } from "../api/TaskApi";
+import { updateMyName } from "../api/UserApi";
+import { useDispatch } from "react-redux";
+import { setUserName } from "../redux/userReducer";
+import { Tooltip } from "../common/Tooltip";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
@@ -48,6 +52,14 @@ const Dashboard = () => {
   const userRoles = useSelector((state) => state.user.userRoles);
   const [recentActivities, setRecentActivities] = useState([]);
   const [todayDueTasks, setTodayDueTasks] = useState([]);
+  const [showTodayTasks, setShowTodayTasks] = useState(true);
+  const [showRecentActivities, setShowRecentActivities] = useState(true);
+  const [editingName, setEditingName] = useState(false);
+  const [newName, setNewName] = useState(userName || "");
+  const [nameLoading, setNameLoading] = useState(false);
+  const [nameError, setNameError] = useState("");
+  const [nameSuccess, setNameSuccess] = useState("");
+  const dispatch = useDispatch();
   useEffect(() => {
     getTodayTasks()
       .then((response) => {
@@ -181,6 +193,22 @@ const Dashboard = () => {
     history.push(`/myTasks?status=${status}`);
   };
 
+  const handleNameUpdate = async (e) => {
+    e.preventDefault();
+    setNameLoading(true);
+    setNameError("");
+    setNameSuccess("");
+    try {
+      await updateMyName(newName);
+      dispatch(setUserName(newName));
+      setNameSuccess("Name updated successfully!");
+      setEditingName(false);
+    } catch (err) {
+      setNameError("Could not update name. Try again.");
+    } finally {
+      setNameLoading(false);
+    }
+  };
   return (
     <div className="dashboard-root">
       <div
@@ -188,7 +216,67 @@ const Dashboard = () => {
         style={{ maxWidth: 900, marginTop: 50 }}
       >
         <div>
-          <h2>Welcome, {userName}!</h2>
+          <h2>
+            Welcome,{" "}
+            {editingName ? (
+              <form className="update-name-form" onSubmit={handleNameUpdate}>
+                <input
+                  className="modern-input"
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  maxLength={50}
+                  disabled={nameLoading}
+                  autoFocus
+                />
+                <span style={{ fontSize: "1rem", display: "inline-block" }}>
+                  <button
+                    className="modern-btn save"
+                    type="submit"
+                    disabled={nameLoading || !newName.trim()}
+                  >
+                    ✔
+                  </button>
+                </span>
+                <span style={{ fontSize: "1rem", display: "inline-block" }}>
+                  <button
+                    className="modern-btn cancel"
+                    type="button"
+                    disabled={nameLoading}
+                    onClick={() => {
+                      setEditingName(false);
+                      setNewName(userName);
+                      setNameError("");
+                      setNameSuccess("");
+                    }}
+                  >
+                    ✖
+                  </button>
+                </span>
+              </form>
+            ) : (
+              <>
+                {userName}{" "}
+                <button
+                  className="icon-btn"
+                  aria-label="Edit Name"
+                  onClick={() => setEditingName(true)}
+                >
+                  <Tooltip text="Edit Name">
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                      <path
+                        d="M14.7 3.29a1 1 0 0 1 1.42 1.42l-10 10A1 1 0 0 1 5 15H3.5a.5.5 0 0 1-.5-.5V13a1 1 0 0 1 .29-.71l10-10zM17.3 2.3a3 3 0 0 0-4.24 0l-10 10A3 3 0 0 0 2 13v2.5A2.5 2.5 0 0 0 4.5 18H7a3 3 0 0 0 2.12-.88l10-10a3 3 0 0 0 0-4.24z"
+                        fill="#2d6cdf"
+                      />
+                    </svg>
+                  </Tooltip>
+                </button>
+              </>
+            )}
+          </h2>
+          {nameError && <div className="name-error">{nameError}</div>}
+          {nameSuccess && <div className="name-success">{nameSuccess}</div>}
+
           <p>Id: {userId}</p>
           <p>Email: {userEmail}</p>
           <p>Roles: {roleNames.join(", ")}</p>
@@ -234,37 +322,79 @@ const Dashboard = () => {
         </div>
       </div>
       <div className="dashboard-right-sidebars">
-        <div className="sidebar-panel">
-          <h3>Today's Tasks</h3>
-          <ul>
-            {todayDueTasks.length === 0 ? (
-              <li className="empty-state">No tasks due today.</li>
-            ) : (
-              todayDueTasks.map((task) => (
-                <li key={task.id} className="today-task-list-item">
-                  <div className="today-task-title">{task.title}</div>
-                  <div className="today-task-due">
-                    {dayjs(task.due_date).format("MMM D, YYYY h:mm A")}
-                  </div>
-                </li>
-              ))
+        <div className={`sidebar-panel ${showTodayTasks ? "open" : ""}`}>
+          <div className="sidebar-panel-content">
+            {showTodayTasks && (
+              <>
+                <div className="sidebar-panel-header">
+                  <button
+                    className="collapse-btn"
+                    onClick={() => setShowTodayTasks(false)}
+                    aria-label="Hide"
+                  ></button>
+                </div>
+                <ul>
+                  {todayDueTasks.length === 0 ? (
+                    <li className="empty-state">No tasks due today.</li>
+                  ) : (
+                    todayDueTasks.map((task) => (
+                      <li key={task.id} className="today-task-list-item">
+                        <div className="today-task-title">{task.title}</div>
+                        <div className="today-task-due">
+                          {dayjs(task.due_date).format("MMM D, YYYY h:mm A")}
+                        </div>
+                      </li>
+                    ))
+                  )}
+                </ul>
+              </>
             )}
-          </ul>
+          </div>
+          <button
+            className="sidebar-panel-togglebar"
+            onClick={() => setShowTodayTasks((v) => !v)}
+            aria-label={showTodayTasks ? "Hide" : "Show"}
+          >
+            <span>Today's Tasks</span>
+            <span style={{ marginLeft: 8 }}>{showTodayTasks ? "▲" : "▼"}</span>
+          </button>
         </div>
-        <div className="sidebar-panel">
-          <h3>Recent Activities</h3>
-          <ul>
-            {recentActivities.length === 0 ? (
-              <li className="empty-state">No recent activity.</li>
-            ) : (
-              recentActivities.map((act, idx) => (
-                <li key={idx} className="activity-list-item">
-                  <div className="activity-text">{act.activity}</div>
-                  <div className="activity-time">{act.time}</div>
-                </li>
-              ))
+        <div className={`sidebar-panel ${showRecentActivities ? "open" : ""}`}>
+          <div className="sidebar-panel-content">
+            {showRecentActivities && (
+              <>
+                <div className="sidebar-panel-header">
+                  <button
+                    className="collapse-btn"
+                    onClick={() => setShowRecentActivities(false)}
+                    aria-label="Hide"
+                  ></button>
+                </div>
+                <ul>
+                  {recentActivities.length === 0 ? (
+                    <li className="empty-state">No recent activity.</li>
+                  ) : (
+                    recentActivities.map((act, idx) => (
+                      <li key={idx} className="activity-list-item">
+                        <div className="activity-text">{act.activity}</div>
+                        <div className="activity-time">{act.time}</div>
+                      </li>
+                    ))
+                  )}
+                </ul>
+              </>
             )}
-          </ul>
+          </div>
+          <button
+            className="sidebar-panel-togglebar"
+            onClick={() => setShowRecentActivities((v) => !v)}
+            aria-label={showRecentActivities ? "Hide" : "Show"}
+          >
+            <span>Recent Activities</span>
+            <span style={{ marginLeft: 8 }}>
+              {showRecentActivities ? "▲" : "▼"}
+            </span>
+          </button>
         </div>
       </div>
     </div>

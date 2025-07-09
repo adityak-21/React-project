@@ -23,6 +23,7 @@ const LoginForm = () => {
   const [password, setPassword] = useState("");
   const [recaptchaToken, setRecaptchaToken] = useState("");
   const recaptchaRef = useRef(null);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -43,6 +44,7 @@ const LoginForm = () => {
       email,
       password,
       recaptchaToken,
+      rememberMe,
     };
     login(requestBody)
       .then((response) => {
@@ -100,6 +102,16 @@ const LoginForm = () => {
         sitekey={process.env.REACT_APP_SITE_KEY}
         onChange={handleRecaptchaChange}
       />
+
+      <div className="form-group remember-me">
+        <input
+          type="checkbox"
+          id="rememberMe"
+          checked={rememberMe}
+          onChange={(e) => setRememberMe(e.target.checked)}
+        />
+        <label htmlFor="rememberMe">Remember me</label>
+      </div>
 
       <button className="login-btn" type="submit">
         Login
